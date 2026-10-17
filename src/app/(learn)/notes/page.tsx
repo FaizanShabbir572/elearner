@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { formatDateTime } from "@/lib/activity";
 import { formatTimestamp } from "@/lib/video";
 import { EmptyState, PageHeader } from "@/components/ui";
+import { StatefulNoteActionsRow } from "@/components/NoteToAction";
 
 export const metadata = { title: "My notes" };
 
@@ -37,6 +38,13 @@ export default async function NotesPage({ searchParams }: { searchParams: Promis
     db.lessonNote.count({ where }),
   ]);
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const actions = notes.length
+    ? await db.action.findMany({
+        where: { userId: user.id, noteId: { in: notes.map((n) => n.id) } },
+        orderBy: { createdAt: "asc" },
+        select: { id: true, title: true, status: true, noteId: true },
+      })
+    : [];
 
   // Group this page's notes by course > lesson, keeping newest-first order.
   const groups = new Map<string, CourseGroup>();
@@ -77,17 +85,18 @@ export default async function NotesPage({ searchParams }: { searchParams: Promis
                     </Link>
                     <ul className="divide-y divide-slate-100">
                       {l.notes.map((n) => (
-                        <li key={n.id}>
+                        <li key={n.id} className="px-5 py-3">
                           <Link href={`/courses/${g.id}?lesson=${lessonId}${n.timestampSec !== null ? `&t=${n.timestampSec}` : ""}`}
-                            className="flex gap-3 px-5 py-3 hover:bg-slate-50">
+                            className="group flex gap-3">
                             <span className={`badge h-fit shrink-0 font-mono ${n.timestampSec !== null ? "bg-brand-50 text-brand-700" : "bg-slate-100 text-slate-500"}`}>
                               {n.timestampSec !== null ? `▶ ${formatTimestamp(n.timestampSec)}` : "Note"}
                             </span>
                             <span className="min-w-0 flex-1">
-                              <span className="line-clamp-3 text-sm break-words whitespace-pre-wrap text-slate-700">{n.content}</span>
+                              <span className="line-clamp-3 text-sm break-words whitespace-pre-wrap text-slate-700 group-hover:text-slate-900">{n.content}</span>
                               <span className="mt-1 block text-xs text-slate-400">Updated {formatDateTime(n.updatedAt)}</span>
                             </span>
                           </Link>
+                          <StatefulNoteActionsRow note={{ id: n.id, content: n.content }} initialActions={actions.filter((a) => a.noteId === n.id)} />
                         </li>
                       ))}
                     </ul>

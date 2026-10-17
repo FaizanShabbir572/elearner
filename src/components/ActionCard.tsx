@@ -54,9 +54,11 @@ export function ActionCard({ action, highlighted = false }: { action: ActionCard
         </div>
       </div>
       {a.description && <p className="mt-1.5 text-sm break-words whitespace-pre-wrap text-slate-600">{a.description}</p>}
-      {a.from && (
+      {(a.from || a.noteDeleted) && (
         <p className="mt-2 text-xs text-slate-500">
-          From: <Link href={a.from.href} className="font-medium text-brand-600 hover:underline">{a.from.label}</Link>
+          {a.from && <>From <Link href={a.from.href} className="font-medium text-brand-600 hover:underline">{a.from.label}</Link></>}
+          {a.from && a.noteDeleted && " · "}
+          {a.noteDeleted && <span className="italic">Source note deleted</span>}
         </p>
       )}
       {a.completedText && <p className="mt-2 text-xs text-slate-400">{a.completedText}</p>}

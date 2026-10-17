@@ -7,7 +7,7 @@ import { formatTimestamp } from "./video";
 /** Prisma select for everything an action card needs. */
 export const ACTION_CARD_SELECT = {
   id: true, title: true, description: true, status: true, source: true, dueDate: true, completedAt: true,
-  lessonId: true, noteId: true,
+  lessonId: true, noteId: true, fromNote: true,
   lesson: { select: { title: true, module: { select: { courseId: true } } } },
   note: { select: { timestampSec: true } },
 } satisfies Prisma.ActionSelect;
@@ -29,6 +29,8 @@ export type ActionCardData = {
   dueState: "overdue" | "soon" | "later" | null;
   completedText: string | null;
   from: { href: string; label: string } | null;
+  /** Created from a note that has since been deleted. */
+  noteDeleted: boolean;
 };
 
 export function toCardData(a: ActionRow, today: Date): ActionCardData {
@@ -37,7 +39,10 @@ export function toCardData(a: ActionRow, today: Date): ActionCardData {
   if (a.lesson && a.lessonId) {
     const ts = a.note?.timestampSec;
     const href = `/courses/${a.lesson.module.courseId}?lesson=${a.lessonId}${ts != null ? `&t=${ts}` : ""}`;
-    from = { href, label: ts != null ? `${a.lesson.title} @ ${formatTimestamp(ts)}` : a.lesson.title };
+    const label = a.note
+      ? ts != null ? `note at ${formatTimestamp(ts)} in ${a.lesson.title}` : `note in ${a.lesson.title}`
+      : a.lesson.title;
+    from = { href, label };
   }
   return {
     id: a.id,
@@ -50,5 +55,6 @@ export function toCardData(a: ActionRow, today: Date): ActionCardData {
     dueState: open ? dueState(a.dueDate, today) : null,
     completedText: a.completedAt ? `Completed ${formatDateTime(a.completedAt)}` : null,
     from,
+    noteDeleted: a.fromNote && a.noteId === null,
   };
 }

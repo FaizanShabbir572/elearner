@@ -44,12 +44,19 @@ export default async function CoursePlayer({ params, searchParams }: { params: P
   const isDone = current ? done.has(current.id) : false;
   // ?t=<seconds> (from a note link) starts the video at that moment.
   const startAt = current && lessonParam === current.id && t && /^\d+$/.test(t) ? Number(t) : null;
-  const notes = current
-    ? await db.lessonNote.findMany({
-        where: { userId: user.id, lessonId: current.id },
-        select: { id: true, lessonId: true, timestampSec: true, content: true, createdAt: true, updatedAt: true },
-      })
-    : [];
+  const [notes, noteActions] = current
+    ? await Promise.all([
+        db.lessonNote.findMany({
+          where: { userId: user.id, lessonId: current.id },
+          select: { id: true, lessonId: true, timestampSec: true, content: true, createdAt: true, updatedAt: true },
+        }),
+        db.action.findMany({
+          where: { userId: user.id, lessonId: current.id, noteId: { not: null } },
+          orderBy: { createdAt: "asc" },
+          select: { id: true, title: true, status: true, noteId: true },
+        }),
+      ])
+    : [[], []];
 
   return (
     <div className="lg:flex lg:min-h-screen">
@@ -110,7 +117,7 @@ export default async function CoursePlayer({ params, searchParams }: { params: P
               {embed && (
                 <>
                   <LessonVideoPlayer embedUrl={embed} title={current.title} startAt={startAt} />
-                  <NotesPanel courseId={course.id} lessonId={current.id} hasVideo initialNotes={notes} />
+                  <NotesPanel courseId={course.id} lessonId={current.id} hasVideo initialNotes={notes} initialActions={noteActions} />
                 </>
               )}
 
@@ -119,7 +126,7 @@ export default async function CoursePlayer({ params, searchParams }: { params: P
                   dangerouslySetInnerHTML={{ __html: renderMarkdown(current.content) }} />
               )}
 
-              {!embed && <div className="mt-8"><NotesPanel courseId={course.id} lessonId={current.id} hasVideo={false} initialNotes={notes} /></div>}
+              {!embed && <div className="mt-8"><NotesPanel courseId={course.id} lessonId={current.id} hasVideo={false} initialNotes={notes} initialActions={noteActions} /></div>}
 
               <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-6">
                 {prev ? <Link href={`/courses/${course.id}?lesson=${prev.id}`} className="btn btn-ghost">← Previous</Link> : <span />}

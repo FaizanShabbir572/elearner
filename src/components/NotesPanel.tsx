@@ -6,6 +6,8 @@ import { NOTE_MAX_LENGTH } from "@/lib/constants";
 import { formatTimestamp } from "@/lib/video";
 import { useVideoPlayer } from "./LessonVideoPlayer";
 import { ConfirmButton } from "./SubmitButton";
+import { NoteActionsRow } from "./NoteToAction";
+import type { ActionDTO } from "@/app/actions/student-actions";
 
 const AUTOSAVE_DELAY_MS = 800;
 
@@ -24,11 +26,14 @@ function sortNotes(notes: NoteDTO[]) {
 // createdId: id of a new note once its first autosave lands (hidden from the list while still being edited).
 type Draft = { key: string; noteId: string | null; createdId?: string; timestampSec: number | null; content: string };
 
-export function NotesPanel({ courseId, lessonId, hasVideo, initialNotes }: { courseId: string; lessonId: string; hasVideo: boolean; initialNotes: NoteDTO[] }) {
+export function NotesPanel({ courseId, lessonId, hasVideo, initialNotes, initialActions }: {
+  courseId: string; lessonId: string; hasVideo: boolean; initialNotes: NoteDTO[]; initialActions: ActionDTO[];
+}) {
   const player = useVideoPlayer();
   const router = useRouter();
   const [notes, setNotes] = useState(() => sortNotes(initialNotes));
   const [draft, setDraft] = useState<Draft | null>(null);
+  const [actions, setActions] = useState(initialActions);
 
   const upsert = useCallback((note: NoteDTO) => {
     setNotes((list) => sortNotes([...list.filter((n) => n.id !== note.id), note]));
@@ -100,7 +105,11 @@ export function NotesPanel({ courseId, lessonId, hasVideo, initialNotes }: { cou
                   ) : (
                     <span className="badge h-fit shrink-0 bg-slate-100 text-slate-500">Note</span>
                   )}
-                  <p className="min-w-0 flex-1 text-sm break-words whitespace-pre-wrap text-slate-700">{n.content}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm break-words whitespace-pre-wrap text-slate-700">{n.content}</p>
+                    <NoteActionsRow note={n} actions={actions.filter((a) => a.noteId === n.id)}
+                      onCreated={(a) => setActions((list) => [...list, a])} />
+                  </div>
                   <div className="flex h-fit shrink-0 gap-1">
                     <button type="button" className="btn btn-ghost btn-sm" disabled={!!draft}
                       onClick={() => setDraft({ key: `edit-${n.id}`, noteId: n.id, timestampSec: n.timestampSec, content: n.content })}>Edit</button>

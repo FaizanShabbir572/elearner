@@ -98,6 +98,7 @@ model Action {
   status      String      @default("TODO") // TODO | IN_PROGRESS | DONE
   dueDate     DateTime? // stored as UTC midnight of the chosen calendar day
   source      String      @default("MANUAL") // MANUAL | AI
+  fromNote    Boolean     @default(false) // created from a note; stays true if the note is later deleted
   completedAt DateTime?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt

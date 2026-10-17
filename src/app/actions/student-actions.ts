@@ -48,7 +48,7 @@ export async function createAction(input: ActionFields & { lessonId?: string | n
   const links = await resolveLinks(user, input?.lessonId, input?.noteId);
   if (!links) return { ok: false, error: "That lesson or note isn't available." };
 
-  const action = await db.action.create({ data: { userId: user.id, ...fields, ...links }, select: DTO_SELECT });
+  const action = await db.action.create({ data: { userId: user.id, ...fields, ...links, fromNote: links.noteId !== null }, select: DTO_SELECT });
   refresh();
   return { ok: true, action };
 }

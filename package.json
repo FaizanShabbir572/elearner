@@ -12,6 +12,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
     "@prisma/adapter-libsql": "^6.19.3",
     "@prisma/client": "^6.16.0",
     "@vimeo/player": "^2.30.4",

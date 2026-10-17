@@ -26,6 +26,8 @@ export const ACTION_SOURCES = ["MANUAL", "AI"] as const;
 export type ActionSource = (typeof ACTION_SOURCES)[number];
 export const ACTION_TITLE_MAX = 200;
 export const ACTION_DESCRIPTION_MAX = 5000;
+/** AI action suggestions each student may request per rolling 24 hours. */
+export const AI_SUGGESTIONS_PER_DAY = 30;
 
 export function isActionStatus(v: unknown): v is ActionStatus {
   return typeof v === "string" && (ACTION_STATUSES as readonly string[]).includes(v);

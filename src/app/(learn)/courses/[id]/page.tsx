@@ -10,6 +10,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { ProgressBar } from "@/components/ui";
 import { LessonVideoPlayer, VideoPlayerProvider } from "@/components/LessonVideoPlayer";
 import { NotesPanel } from "@/components/NotesPanel";
+import { isAiEnabled } from "@/lib/ai";
 
 export default async function CoursePlayer({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ lesson?: string; t?: string }> }) {
   const user = await requireApproved();
@@ -117,7 +118,7 @@ export default async function CoursePlayer({ params, searchParams }: { params: P
               {embed && (
                 <>
                   <LessonVideoPlayer embedUrl={embed} title={current.title} startAt={startAt} />
-                  <NotesPanel courseId={course.id} lessonId={current.id} hasVideo initialNotes={notes} initialActions={noteActions} />
+                  <NotesPanel courseId={course.id} lessonId={current.id} hasVideo initialNotes={notes} initialActions={noteActions} aiEnabled={isAiEnabled()} />
                 </>
               )}
 
@@ -126,7 +127,7 @@ export default async function CoursePlayer({ params, searchParams }: { params: P
                   dangerouslySetInnerHTML={{ __html: renderMarkdown(current.content) }} />
               )}
 
-              {!embed && <div className="mt-8"><NotesPanel courseId={course.id} lessonId={current.id} hasVideo={false} initialNotes={notes} initialActions={noteActions} /></div>}
+              {!embed && <div className="mt-8"><NotesPanel courseId={course.id} lessonId={current.id} hasVideo={false} initialNotes={notes} initialActions={noteActions} aiEnabled={isAiEnabled()} /></div>}
 
               <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-6">
                 {prev ? <Link href={`/courses/${course.id}?lesson=${prev.id}`} className="btn btn-ghost">← Previous</Link> : <span />}

@@ -29,6 +29,7 @@ model User {
   loginSessions    LoginSession[]
   notes            LessonNote[]
   actions          Action[]
+  aiUsage          AiUsage[]
 }
 
 model Course {
@@ -146,4 +147,15 @@ model LoginSession {
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, startedAt])
+}
+
+// One row per AI request, used for per-user daily limits (cost control).
+model AiUsage {
+  id        String   @id @default(cuid())
+  userId    String
+  kind      String // e.g. SUGGEST_ACTIONS
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, kind, createdAt])
 }

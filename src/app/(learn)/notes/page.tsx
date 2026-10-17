@@ -5,6 +5,7 @@ import { formatDateTime } from "@/lib/activity";
 import { formatTimestamp } from "@/lib/video";
 import { EmptyState, PageHeader } from "@/components/ui";
 import { StatefulNoteActionsRow } from "@/components/NoteToAction";
+import { isAiEnabled } from "@/lib/ai";
 
 export const metadata = { title: "My notes" };
 
@@ -96,7 +97,7 @@ export default async function NotesPage({ searchParams }: { searchParams: Promis
                               <span className="mt-1 block text-xs text-slate-400">Updated {formatDateTime(n.updatedAt)}</span>
                             </span>
                           </Link>
-                          <StatefulNoteActionsRow note={{ id: n.id, content: n.content }} initialActions={actions.filter((a) => a.noteId === n.id)} />
+                          <StatefulNoteActionsRow note={{ id: n.id, content: n.content }} initialActions={actions.filter((a) => a.noteId === n.id)} aiEnabled={isAiEnabled()} />
                         </li>
                       ))}
                     </ul>

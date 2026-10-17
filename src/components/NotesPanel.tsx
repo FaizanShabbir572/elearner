@@ -26,8 +26,8 @@ function sortNotes(notes: NoteDTO[]) {
 // createdId: id of a new note once its first autosave lands (hidden from the list while still being edited).
 type Draft = { key: string; noteId: string | null; createdId?: string; timestampSec: number | null; content: string };
 
-export function NotesPanel({ courseId, lessonId, hasVideo, initialNotes, initialActions }: {
-  courseId: string; lessonId: string; hasVideo: boolean; initialNotes: NoteDTO[]; initialActions: ActionDTO[];
+export function NotesPanel({ courseId, lessonId, hasVideo, initialNotes, initialActions, aiEnabled }: {
+  courseId: string; lessonId: string; hasVideo: boolean; initialNotes: NoteDTO[]; initialActions: ActionDTO[]; aiEnabled: boolean;
 }) {
   const player = useVideoPlayer();
   const router = useRouter();
@@ -107,7 +107,7 @@ export function NotesPanel({ courseId, lessonId, hasVideo, initialNotes, initial
                   )}
                   <div className="min-w-0 flex-1">
                     <p className="text-sm break-words whitespace-pre-wrap text-slate-700">{n.content}</p>
-                    <NoteActionsRow note={n} actions={actions.filter((a) => a.noteId === n.id)}
+                    <NoteActionsRow note={n} actions={actions.filter((a) => a.noteId === n.id)} aiEnabled={aiEnabled}
                       onCreated={(a) => setActions((list) => [...list, a])} />
                   </div>
                   <div className="flex h-fit shrink-0 gap-1">

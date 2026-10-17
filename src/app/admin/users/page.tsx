@@ -1,0 +1,123 @@
+import Link from "next/link";
+import { db } from "@/lib/db";
+import { LEVELS, LEVEL_LABEL, STATUSES } from "@/lib/constants";
+import { approveUser, deleteUser, rejectUser } from "@/app/actions/admin-users";
+import { EmptyState, LevelBadge, PageHeader, StatusBadge } from "@/components/ui";
+import { ConfirmButton, SubmitButton } from "@/components/SubmitButton";
+import { formatDateTime, formatDuration, isActiveNow, sessionDurationMs } from "@/lib/activity";
+
+export const metadata = { title: "Users" };
+
+export default async function UsersPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
+  const { status } = await searchParams;
+  const filter = (STATUSES as readonly string[]).includes(status ?? "") ? status : undefined;
+
+  const [users, counts] = await Promise.all([
+    db.user.findMany({
+      where: { role: "STUDENT", ...(filter ? { status: filter } : {}) },
+      orderBy: [{ createdAt: "desc" }],
+      include: { _count: { select: { certificates: true } } },
+    }),
+    db.user.groupBy({ by: ["status"], where: { role: "STUDENT" }, _count: true }),
+  ]);
+  const sessions = await db.loginSession.findMany({
+    where: { userId: { in: users.map((u) => u.id) } },
+    select: { userId: true, startedAt: true, lastSeenAt: true, endedAt: true },
+  });
+  const activity = new Map<string, { lastLogin: Date | null; totalMs: number; online: boolean }>();
+  for (const s of sessions) {
+    const a = activity.get(s.userId) ?? { lastLogin: null, totalMs: 0, online: false };
+    if (!a.lastLogin || s.startedAt > a.lastLogin) a.lastLogin = s.startedAt;
+    a.totalMs += sessionDurationMs(s);
+    a.online ||= isActiveNow(s);
+    activity.set(s.userId, a);
+  }
+  const countOf =(s?: string) => (s ? counts.find((c) => c.status === s)?._count ?? 0 : counts.reduce((a, c) => a + c._count, 0));
+
+  const tabs = [{ key: undefined, label: "All" }, ...STATUSES.map((s) => ({ key: s, label: s.charAt(0) + s.slice(1).toLowerCase() }))];
+
+  return (
+    <>
+      <PageHeader title="Users" subtitle="Approve new registrations and assign each student a proficiency track." />
+
+      <div className="mb-5 flex flex-wrap gap-1.5">
+        {tabs.map((t) => (
+          <Link key={t.label} href={t.key ? `/admin/users?status=${t.key}` : "/admin/users"}
+            className={`btn btn-sm ${filter === t.key ? "bg-slate-900 text-white" : "btn-secondary"}`}>
+            {t.label}
+            <span className={`rounded-full px-1.5 text-[11px] ${filter === t.key ? "bg-white/20" : t.key === "PENDING" && countOf(t.key) > 0 ? "bg-amber-100 text-amber-800" : "bg-slate-100"}`}>{countOf(t.key)}</span>
+          </Link>
+        ))}
+      </div>
+
+      {users.length === 0 ? (
+        <EmptyState title={filter ? `No ${filter.toLowerCase()} users` : "No students yet"}>New registrations will appear here.</EmptyState>
+      ) : (
+        <div className="card overflow-x-auto">
+          <table className="w-full min-w-[980px] text-left text-sm">
+            <thead className="border-b border-slate-200 bg-slate-50/70 text-xs font-medium tracking-wide text-slate-500 uppercase">
+              <tr>
+                <th className="px-5 py-3">Student</th>
+                <th className="px-5 py-3">Status</th>
+                <th className="px-5 py-3">Level</th>
+                <th className="px-5 py-3">Joined</th>
+                <th className="px-5 py-3">Activity</th>
+                <th className="px-5 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {users.map((u) => {
+                const act = activity.get(u.id);
+                return (
+                <tr key={u.id} className={u.status === "PENDING" ? "bg-amber-50/30" : ""}>
+                  <td className="px-5 py-3.5">
+                    <Link href={`/admin/users/${u.id}`} className="font-medium text-slate-900 hover:text-brand-600 hover:underline">{u.name}</Link>
+                    <p className="text-xs text-slate-500">{u.email}{u._count.certificates > 0 && ` · ${u._count.certificates} certificate${u._count.certificates > 1 ? "s" : ""}`}</p>
+                  </td>
+                  <td className="px-5 py-3.5"><StatusBadge status={u.status} /></td>
+                  <td className="px-5 py-3.5"><LevelBadge level={u.proficiencyLevel} /></td>
+                  <td className="px-5 py-3.5 whitespace-nowrap text-slate-500">{u.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
+                  <td className="px-5 py-3.5 whitespace-nowrap">
+                    {act?.lastLogin ? (
+                      <>
+                        <p className="flex items-center gap-1.5 text-slate-700">
+                          {act.online && <span className="h-2 w-2 rounded-full bg-emerald-500" title="Online" aria-label="Online" />}
+                          {formatDateTime(act.lastLogin)}
+                        </p>
+                        <p className="text-xs text-slate-500">{formatDuration(act.totalMs)} total{act.online && " · Online"}</p>
+                      </>
+                    ) : (
+                      <span className="text-xs text-slate-400">Never</span>
+                    )}
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center justify-end gap-2">
+                      <form action={approveUser} className="flex items-center gap-1.5">
+                        <input type="hidden" name="id" value={u.id} />
+                        <select name="level" defaultValue={u.proficiencyLevel ?? "BEGINNER"} className="input w-auto py-1.5 text-xs" aria-label={`Level for ${u.name}`}>
+                          {LEVELS.map((l) => <option key={l} value={l}>{LEVEL_LABEL[l]}</option>)}
+                        </select>
+                        <SubmitButton className="btn btn-primary btn-sm">{u.status === "APPROVED" ? "Update" : "Approve"}</SubmitButton>
+                      </form>
+                      {u.status !== "REJECTED" && (
+                        <form action={rejectUser}>
+                          <input type="hidden" name="id" value={u.id} />
+                          <SubmitButton className="btn btn-secondary btn-sm">Reject</SubmitButton>
+                        </form>
+                      )}
+                      <form action={deleteUser}>
+                        <input type="hidden" name="id" value={u.id} />
+                        <ConfirmButton message={`Permanently delete ${u.name}? Their progress and certificates will be removed.`}>Delete</ConfirmButton>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </>
+  );
+}

@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { LEVEL_LABEL } from "@/lib/constants";
 import { visibleCoursesWhere } from "@/lib/courses";
 import { EmptyState, LevelBadge, ProgressBar } from "@/components/ui";
+import { startOfToday } from "@/lib/due";
+import { ACTION_CARD_SELECT, URGENCY_ORDER, toCardData } from "@/lib/student-actions";
 
 export const metadata = { title: "My courses" };
 
@@ -11,7 +13,8 @@ export default async function DashboardPage() {
   const user = await requireApproved();
   const isAdmin = user.role === "ADMIN";
 
-  const [courses, done, certs] = await Promise.all([
+  const today = startOfToday();
+  const [courses, done, certs, openActionCount, urgentActions] = await Promise.all([
     db.course.findMany({
       where: visibleCoursesWhere(user),
       orderBy: { createdAt: "asc" },
@@ -19,7 +22,10 @@ export default async function DashboardPage() {
     }),
     db.progress.findMany({ where: { userId: user.id, completed: true }, select: { lessonId: true } }),
     db.certificate.findMany({ where: { userId: user.id }, include: { course: { select: { title: true } } }, orderBy: { issuedAt: "desc" } }),
+    db.action.count({ where: { userId: user.id, status: { not: "DONE" } } }),
+    db.action.findMany({ where: { userId: user.id, status: { not: "DONE" } }, orderBy: URGENCY_ORDER, take: 3, select: ACTION_CARD_SELECT }),
   ]);
+  const urgent = urgentActions.map((a) => toCardData(a, today));
   const doneSet = new Set(done.map((d) => d.lessonId));
   const certByCourse = new Map(certs.map((c) => [c.courseId, c]));
 
@@ -53,6 +59,32 @@ export default async function DashboardPage() {
           </div>
         ))}
       </div>
+
+      <section className="card mb-8 p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="font-semibold">Your open actions</h2>
+            <p className="text-sm text-slate-500">
+              {openActionCount === 0 ? "No open actions. Turn what you learn into practice tasks." : `${openActionCount} open action${openActionCount === 1 ? "" : "s"}`}
+            </p>
+          </div>
+          <Link href="/actions" className="btn btn-secondary btn-sm">{openActionCount === 0 ? "Create an action" : "View all actions"}</Link>
+        </div>
+        {urgent.length > 0 && (
+          <ul className="mt-4 divide-y divide-slate-100 border-t border-slate-100">
+            {urgent.map((a) => (
+              <li key={a.id}>
+                <Link href={`/actions?highlight=${a.id}`} className="flex items-center justify-between gap-3 py-2.5 text-sm hover:text-brand-600">
+                  <span className="min-w-0 truncate text-slate-800">{a.title}</span>
+                  {a.dueText && (
+                    <span className={`badge shrink-0 ${a.dueState === "overdue" ? "bg-red-50 text-red-700" : a.dueState === "soon" ? "bg-amber-50 text-amber-800" : "bg-slate-100 text-slate-600"}`}>{a.dueText}</span>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {cards.length === 0 ? (
         <EmptyState title="No courses for your level yet">New courses for your track will show up here as soon as they're published.</EmptyState>

@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { requireApproved, type CurrentUser } from "@/lib/auth";
-import { canAccessCourse } from "@/lib/courses";
+import { accessibleLesson } from "@/lib/access";
 import { NOTE_MAX_LENGTH } from "@/lib/constants";
 
 export type NoteDTO = { id: string; lessonId: string; timestampSec: number | null; content: string; createdAt: Date; updatedAt: Date };
@@ -16,23 +16,18 @@ function cleanContent(content: unknown): string | { error: string } {
   return content;
 }
 
-async function lessonAccessible(user: CurrentUser, lessonId: string) {
-  const lesson = await db.lesson.findUnique({ where: { id: lessonId }, select: { module: { select: { course: { select: { published: true, proficiencyLevel: true } } } } } });
-  return !!lesson && canAccessCourse(user, lesson.module.course);
-}
-
 /** The current user's note, only if its lesson is still accessible to them. */
 async function ownNote(user: CurrentUser, noteId: unknown) {
   if (typeof noteId !== "string") return null;
   const note = await db.lessonNote.findFirst({ where: { id: noteId, userId: user.id }, select: { lessonId: true } });
-  return note && (await lessonAccessible(user, note.lessonId)) ? note : null;
+  return note && (await accessibleLesson(user, note.lessonId)) ? note : null;
 }
 
 export async function createNote(lessonId: string, timestampSec: number | null, content: string): Promise<NoteResult> {
   const user = await requireApproved();
   const text = cleanContent(content);
   if (typeof text !== "string") return { ok: false, ...text };
-  if (typeof lessonId !== "string" || !(await lessonAccessible(user, lessonId))) return { ok: false, error: "Lesson not available." };
+  if (!(await accessibleLesson(user, lessonId))) return { ok: false, error: "Lesson not available." };
   const ts = typeof timestampSec === "number" && Number.isFinite(timestampSec) && timestampSec >= 0 ? Math.floor(timestampSec) : null;
 
   const note = await db.lessonNote.create({ data: { userId: user.id, lessonId, timestampSec: ts, content: text }, select: NOTE_SELECT });

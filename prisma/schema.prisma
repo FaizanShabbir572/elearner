@@ -28,6 +28,7 @@ model User {
   certificates     Certificate[]
   loginSessions    LoginSession[]
   notes            LessonNote[]
+  actions          Action[]
 }
 
 model Course {
@@ -65,6 +66,7 @@ model Lesson {
   module    Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   progress  Progress[]
   notes     LessonNote[]
+  actions   Action[]
 
   @@index([moduleId])
 }
@@ -79,9 +81,33 @@ model LessonNote {
   updatedAt    DateTime @updatedAt
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   lesson       Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  actions      Action[]
 
   @@index([userId, lessonId])
   @@index([userId, updatedAt])
+}
+
+// A student's own to-do item ("action"), optionally linked to the lesson/note it came from.
+model Action {
+  id          String      @id @default(cuid())
+  userId      String
+  lessonId    String?
+  noteId      String?
+  title       String
+  description String      @default("")
+  status      String      @default("TODO") // TODO | IN_PROGRESS | DONE
+  dueDate     DateTime? // stored as UTC midnight of the chosen calendar day
+  source      String      @default("MANUAL") // MANUAL | AI
+  completedAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson?     @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+  note        LessonNote? @relation(fields: [noteId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+  @@index([userId, dueDate])
+  @@index([noteId])
 }
 
 model Progress {

@@ -137,7 +137,7 @@ export async function updateLesson(_: { error?: string } | undefined, form: Form
   }
   const lesson = await db.lesson.update({
     where: { id },
-    data: { title, content: String(form.get("content") ?? ""), videoUrl },
+    data: { title, content: String(form.get("content") ?? ""), videoUrl, transcript: String(form.get("transcript") ?? "") },
     include: { module: true },
   });
   refresh(lesson.module.courseId);

@@ -30,6 +30,8 @@ model User {
   notes            LessonNote[]
   actions          Action[]
   aiUsage          AiUsage[]
+  quizAttempts     QuizAttempt[]
+  challenges       ChallengeResponse[]
 }
 
 model Course {
@@ -62,12 +64,16 @@ model Lesson {
   title     String
   content   String     @default("")
   videoUrl  String?
+  transcript String    @default("") // optional video transcript / key points; improves quizzes
   order     Int        @default(0)
   createdAt DateTime   @default(now())
   module    Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   progress  Progress[]
   notes     LessonNote[]
   actions   Action[]
+  assessment   LessonAssessment?
+  quizAttempts QuizAttempt[]
+  challenges   ChallengeResponse[]
 
   @@index([moduleId])
 }
@@ -158,4 +164,49 @@ model AiUsage {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, kind, createdAt])
+}
+
+// AI-generated quiz + practice challenges, cached once per lesson (shared by all students).
+model LessonAssessment {
+  id             String   @id @default(cuid())
+  lessonId       String   @unique
+  questionsJson  String // [{ id, question, options[4], correctIndex, explanation, sourceQuote }]
+  challengesJson String // [{ id, title, instructions, checklist[] }]
+  sourceHash     String // hash of the lesson text it was generated from; a change triggers regeneration
+  source         String   @default("AI")
+  generatedAt    DateTime @default(now())
+  lesson         Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+}
+
+model QuizAttempt {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  score       Int
+  total       Int
+  answersJson String // { [questionId]: { choice, correct } }
+  isRetry     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([userId, lessonId])
+  @@index([userId, createdAt])
+}
+
+model ChallengeResponse {
+  id            String    @id @default(cuid())
+  userId        String
+  lessonId      String
+  challengeId   String
+  answer        String    @default("")
+  reflection    String    @default("")
+  checklistJson String    @default("[]") // boolean per checklist item
+  completedAt   DateTime?
+  updatedAt     DateTime  @updatedAt
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson        Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId, challengeId])
+  @@index([userId, completedAt])
 }

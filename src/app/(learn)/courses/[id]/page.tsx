@@ -11,6 +11,8 @@ import { ProgressBar } from "@/components/ui";
 import { LessonVideoPlayer, VideoPlayerProvider } from "@/components/LessonVideoPlayer";
 import { NotesPanel } from "@/components/NotesPanel";
 import { isAiEnabled } from "@/lib/ai";
+import { practiceAvailability } from "@/lib/assessment";
+import { LessonPractice } from "@/components/LessonPractice";
 
 export default async function CoursePlayer({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ lesson?: string; t?: string }> }) {
   const user = await requireApproved();
@@ -58,6 +60,7 @@ export default async function CoursePlayer({ params, searchParams }: { params: P
         }),
       ])
     : [[], []];
+  const practice = current ? await practiceAvailability(current) : "hidden";
 
   return (
     <div className="lg:flex lg:min-h-screen">
@@ -126,6 +129,8 @@ export default async function CoursePlayer({ params, searchParams }: { params: P
                 <article className="prose prose-slate max-w-none prose-headings:font-semibold prose-a:text-brand-600 prose-pre:bg-slate-900"
                   dangerouslySetInnerHTML={{ __html: renderMarkdown(current.content) }} />
               )}
+
+              {practice !== "hidden" && <LessonPractice key={current.id} lessonId={current.id} availability={practice} />}
 
               {!embed && <div className="mt-8"><NotesPanel courseId={course.id} lessonId={current.id} hasVideo={false} initialNotes={notes} initialActions={noteActions} aiEnabled={isAiEnabled()} /></div>}
 

@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { deleteLesson } from "@/app/actions/admin-courses";
 import { LessonEditor } from "@/components/LessonEditor";
 import { ConfirmButton } from "@/components/SubmitButton";
+import { QuizPreview } from "@/components/QuizPreview";
 
 export const metadata = { title: "Edit lesson" };
 
@@ -26,6 +27,7 @@ export default async function EditLessonPage({ params }: { params: Promise<{ id:
         </form>
       </div>
       <LessonEditor lesson={lesson} />
+      <QuizPreview lessonId={lesson.id} />
     </div>
   );
 }

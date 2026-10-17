@@ -4,7 +4,7 @@ import { updateLesson } from "@/app/actions/admin-courses";
 import { toEmbedUrl } from "@/lib/video";
 import { SubmitButton } from "./SubmitButton";
 
-type Lesson = { id: string; title: string; content: string; videoUrl: string | null };
+type Lesson = { id: string; title: string; content: string; videoUrl: string | null; transcript: string };
 
 export function LessonEditor({ lesson }: { lesson: Lesson }) {
   const [state, action] = useActionState(updateLesson, undefined);
@@ -35,6 +35,12 @@ export function LessonEditor({ lesson }: { lesson: Lesson }) {
           <textarea className="input min-h-80 font-mono text-[13px] leading-relaxed" id="content" name="content" defaultValue={lesson.content}
             placeholder={"## Introduction\n\nWrite your lesson here. **Markdown** is supported: headings, lists, links, `code` and code blocks."} />
           <p className="mt-1 text-xs text-slate-500">Markdown supported — headings, **bold**, lists, links, `code` and fenced code blocks.</p>
+        </div>
+        <div>
+          <label className="label" htmlFor="transcript">Video transcript / key points <span className="font-normal text-slate-400">(optional — improves quizzes)</span></label>
+          <textarea className="input min-h-40 text-[13px] leading-relaxed" id="transcript" name="transcript" defaultValue={lesson.transcript}
+            placeholder="Paste the video transcript (YouTube: … → Show transcript) or the key points covered in the video." />
+          <p className="mt-1 text-xs text-slate-500">Not shown to students. Quizzes and practice challenges are generated only from the lesson content and this text.</p>
         </div>
       </div>
       <SubmitButton className="btn btn-primary" pendingText="Saving…">Save lesson</SubmitButton>

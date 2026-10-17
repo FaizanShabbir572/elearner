@@ -13,6 +13,7 @@ import { NotesPanel } from "@/components/NotesPanel";
 import { isAiEnabled } from "@/lib/ai";
 import { practiceAvailability } from "@/lib/assessment";
 import { LessonPractice } from "@/components/LessonPractice";
+import { WatchTracker } from "@/components/WatchTracker";
 
 export default async function CoursePlayer({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ lesson?: string; t?: string }> }) {
   const user = await requireApproved();
@@ -121,6 +122,7 @@ export default async function CoursePlayer({ params, searchParams }: { params: P
               {embed && (
                 <>
                   <LessonVideoPlayer embedUrl={embed} title={current.title} startAt={startAt} />
+                  <WatchTracker lessonId={current.id} />
                   <NotesPanel courseId={course.id} lessonId={current.id} hasVideo initialNotes={notes} initialActions={noteActions} aiEnabled={isAiEnabled()} />
                 </>
               )}

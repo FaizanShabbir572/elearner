@@ -32,6 +32,7 @@ model User {
   aiUsage          AiUsage[]
   quizAttempts     QuizAttempt[]
   challenges       ChallengeResponse[]
+  lessonViews      LessonView[]
 }
 
 model Course {
@@ -74,6 +75,7 @@ model Lesson {
   assessment   LessonAssessment?
   quizAttempts QuizAttempt[]
   challenges   ChallengeResponse[]
+  views        LessonView[]
 
   @@index([moduleId])
 }
@@ -186,6 +188,8 @@ model QuizAttempt {
   total       Int
   answersJson String // { [questionId]: { choice, correct } }
   isRetry     Boolean  @default(false)
+  kind        String   @default("QUIZ") // QUIZ (lesson quiz) | RECALL (quick-recall round)
+  percent     Int      @default(0) // round(score / total * 100), for aggregate queries
   createdAt   DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
@@ -209,4 +213,22 @@ model ChallengeResponse {
 
   @@unique([userId, lessonId, challengeId])
   @@index([userId, completedAt])
+}
+
+// How far a student has watched a lesson video, and when they last revisited it.
+model LessonView {
+  id             String    @id @default(cuid())
+  userId         String
+  lessonId       String
+  maxPositionSec Int       @default(0)
+  durationSec    Int?
+  watched        Boolean   @default(false) // reached at least 80% of the video
+  firstWatchedAt DateTime  @default(now())
+  lastWatchedAt  DateTime  @default(now())
+  lastReviewedAt DateTime?
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson         Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([userId, lastWatchedAt])
 }

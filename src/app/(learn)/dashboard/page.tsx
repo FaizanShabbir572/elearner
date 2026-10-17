@@ -6,6 +6,8 @@ import { visibleCoursesWhere } from "@/lib/courses";
 import { EmptyState, LevelBadge, ProgressBar } from "@/components/ui";
 import { startOfToday } from "@/lib/due";
 import { ACTION_CARD_SELECT, URGENCY_ORDER, toCardData } from "@/lib/student-actions";
+import { getStudentStats, statCards } from "@/lib/student-stats";
+import { KeepItFresh } from "@/components/KeepItFresh";
 
 export const metadata = { title: "My courses" };
 
@@ -14,7 +16,7 @@ export default async function DashboardPage() {
   const isAdmin = user.role === "ADMIN";
 
   const today = startOfToday();
-  const [courses, done, certs, openActionCount, urgentActions] = await Promise.all([
+  const [courses, done, certs, openActionCount, urgentActions, stats] = await Promise.all([
     db.course.findMany({
       where: visibleCoursesWhere(user),
       orderBy: { createdAt: "asc" },
@@ -24,6 +26,7 @@ export default async function DashboardPage() {
     db.certificate.findMany({ where: { userId: user.id }, include: { course: { select: { title: true } } }, orderBy: { issuedAt: "desc" } }),
     db.action.count({ where: { userId: user.id, status: { not: "DONE" } } }),
     db.action.findMany({ where: { userId: user.id, status: { not: "DONE" } }, orderBy: URGENCY_ORDER, take: 3, select: ACTION_CARD_SELECT }),
+    getStudentStats(user),
   ]);
   const urgent = urgentActions.map((a) => toCardData(a, today));
   const doneSet = new Set(done.map((d) => d.lessonId));
@@ -59,6 +62,20 @@ export default async function DashboardPage() {
           </div>
         ))}
       </div>
+
+      <section className="mb-8" aria-label="Your progress">
+        <h2 className="mb-3 text-sm font-semibold text-slate-500">Your progress</h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {statCards(stats).map(([label, value]) => (
+            <div key={label} className="card p-4">
+              <p className="text-xl font-semibold text-slate-900">{value}</p>
+              <p className="mt-0.5 text-xs text-slate-500">{label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <KeepItFresh user={user} variant="dashboard" />
 
       <section className="card mb-8 p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -107,6 +124,17 @@ export default async function DashboardPage() {
                     <span className="font-medium text-slate-700">{c.percent}%</span>
                   </div>
                   <ProgressBar percent={c.percent} />
+                  {(() => {
+                    const cs = stats.perCourse.get(c.id);
+                    if (!cs || (cs.videosTotal === 0 && cs.avgQuiz === null)) return null;
+                    return (
+                      <p className="mt-2 text-xs text-slate-500">
+                        {cs.videosTotal > 0 && <>{cs.videosWatched}/{cs.videosTotal} videos watched</>}
+                        {cs.videosTotal > 0 && cs.avgQuiz !== null && " · "}
+                        {cs.avgQuiz !== null && <>Quiz avg {cs.avgQuiz}%</>}
+                      </p>
+                    );
+                  })()}
                 </div>
                 <div className="mt-5 flex gap-2">
                   <Link href={`/courses/${c.id}`} className="btn btn-primary flex-1">

@@ -5,6 +5,7 @@ import { END_REASON_LABEL, formatDate, formatDateTime, formatDuration, isActiveN
 import { issueCertificate, revokeCertificate } from "@/app/actions/admin-users";
 import { EmptyState, LevelBadge, PageHeader, ProgressBar, StatusBadge } from "@/components/ui";
 import { ConfirmButton, SubmitButton } from "@/components/SubmitButton";
+import { getStudentStats, statCards } from "@/lib/student-stats";
 
 export const metadata = { title: "Student details" };
 
@@ -13,7 +14,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
   const user = await db.user.findUnique({ where: { id } });
   if (!user) notFound();
 
-  const [sessions, progress, certs, allCourses] = await Promise.all([
+  const [sessions, progress, certs, allCourses, learning] = await Promise.all([
     db.loginSession.findMany({ where: { userId: id }, orderBy: { startedAt: "desc" } }),
     db.progress.findMany({
       where: { userId: id },
@@ -21,6 +22,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
     }),
     db.certificate.findMany({ where: { userId: id } }),
     db.course.findMany({ orderBy: { createdAt: "asc" }, select: { id: true, title: true, published: true } }),
+    getStudentStats(user),
   ]);
 
   // Courses to show: published ones on the user's track, plus anything they've touched or been certified for.
@@ -84,6 +86,19 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
         ))}
       </div>
 
+      <section className="mb-10" aria-label="Learning progress">
+        <h2 className="mb-1 font-semibold">Learning progress</h2>
+        <p className="mb-4 text-sm text-slate-500">Counts only — the content of the student&apos;s notes and answers stays private.</p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {statCards(learning).map(([label, value]) => (
+            <div key={label} className="card p-4">
+              <p className="text-xl font-semibold text-slate-900">{value}</p>
+              <p className="mt-0.5 text-xs text-slate-500">{label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="mb-10">
         <h2 className="mb-4 font-semibold">Course progress</h2>
         {rows.length === 0 ? (
@@ -105,6 +120,11 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
                   <ProgressBar percent={c.percent} />
                   <p className="mt-1.5 text-xs text-slate-500">
                     {c.lastActivity ? `Last activity ${formatDateTime(c.lastActivity)}` : "Not started"}
+                    {(() => {
+                      const cs = learning.perCourse.get(c.id);
+                      if (!cs) return null;
+                      return <>{cs.videosTotal > 0 && ` · ${cs.videosWatched}/${cs.videosTotal} videos watched`}{cs.avgQuiz !== null && ` · Quiz avg ${cs.avgQuiz}%`}</>;
+                    })()}
                   </p>
                 </div>
 

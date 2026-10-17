@@ -19,7 +19,7 @@ export type QuizResult = { ok: true; score: number; total: number; results: Ques
 
 async function quizStats(userId: string, lessonId: string): Promise<QuizStats> {
   // Best score counts full attempts only; "retry incorrect" rounds are practice.
-  const attempts = await db.quizAttempt.findMany({ where: { userId, lessonId, isRetry: false }, select: { score: true, total: true } });
+  const attempts = await db.quizAttempt.findMany({ where: { userId, lessonId, kind: "QUIZ", isRetry: false }, select: { score: true, total: true } });
   if (attempts.length === 0) return null;
   const best = attempts.reduce((a, b) => (b.score / b.total > a.score / a.total ? b : a));
   return { bestScore: best.score, bestTotal: best.total, attempts: attempts.length };
@@ -84,6 +84,8 @@ export async function submitQuiz(lessonId: string, answers: Record<string, numbe
       lessonId,
       score,
       total: results.length,
+      percent: Math.round((score / results.length) * 100),
+      kind: "QUIZ",
       isRetry: !!isRetry,
       answersJson: JSON.stringify(Object.fromEntries(results.map((r) => [r.questionId, { choice: r.choice, correct: r.correct }]))),
     },

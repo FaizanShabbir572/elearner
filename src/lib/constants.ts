@@ -15,3 +15,6 @@ export const LEVEL_LABEL: Record<string, string> = {
 export function isLevel(v: unknown): v is Level {
   return typeof v === "string" && (LEVELS as readonly string[]).includes(v);
 }
+
+/** Maximum length of a lesson note. */
+export const NOTE_MAX_LENGTH = 5000;

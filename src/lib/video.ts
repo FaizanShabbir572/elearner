@@ -29,3 +29,21 @@ export function toEmbedUrl(raw: string | null | undefined): string | null {
   if (host === "player.vimeo.com") return url.toString();
   return null;
 }
+
+export type VideoProvider = "youtube" | "vimeo";
+
+/** Which player API can control this embed URL (from toEmbedUrl). */
+export function videoProvider(embedUrl: string): VideoProvider | null {
+  if (embedUrl.startsWith("https://www.youtube-nocookie.com/embed/")) return "youtube";
+  if (embedUrl.startsWith("https://player.vimeo.com/video/")) return "vimeo";
+  return null;
+}
+
+/** 75 → "1:15", 3725 → "1:02:05" */
+export function formatTimestamp(totalSec: number) {
+  const s = Math.max(0, Math.floor(totalSec));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const ss = String(s % 60).padStart(2, "0");
+  return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${ss}` : `${m}:${ss}`;
+}

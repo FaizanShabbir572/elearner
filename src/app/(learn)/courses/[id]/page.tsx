@@ -8,11 +8,13 @@ import { toEmbedUrl } from "@/lib/video";
 import { setLessonComplete } from "@/app/actions/learning";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ProgressBar } from "@/components/ui";
+import { LessonVideoPlayer, VideoPlayerProvider } from "@/components/LessonVideoPlayer";
+import { NotesPanel } from "@/components/NotesPanel";
 
-export default async function CoursePlayer({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ lesson?: string }> }) {
+export default async function CoursePlayer({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ lesson?: string; t?: string }> }) {
   const user = await requireApproved();
   const { id } = await params;
-  const { lesson: lessonParam } = await searchParams;
+  const { lesson: lessonParam, t } = await searchParams;
 
   const course = await db.course.findUnique({
     where: { id },
@@ -40,6 +42,14 @@ export default async function CoursePlayer({ params, searchParams }: { params: P
   const next = lessons[index + 1];
   const embed = toEmbedUrl(current?.videoUrl);
   const isDone = current ? done.has(current.id) : false;
+  // ?t=<seconds> (from a note link) starts the video at that moment.
+  const startAt = current && lessonParam === current.id && t && /^\d+$/.test(t) ? Number(t) : null;
+  const notes = current
+    ? await db.lessonNote.findMany({
+        where: { userId: user.id, lessonId: current.id },
+        select: { id: true, lessonId: true, timestampSec: true, content: true, createdAt: true, updatedAt: true },
+      })
+    : [];
 
   return (
     <div className="lg:flex lg:min-h-screen">
@@ -93,20 +103,23 @@ export default async function CoursePlayer({ params, searchParams }: { params: P
           {!current ? (
             <div className="card px-6 py-14 text-center text-slate-500">This course doesn&apos;t have any lessons yet.</div>
           ) : (
-            <>
+            <VideoPlayerProvider key={current.id}>
               <p className="text-xs font-medium tracking-wide text-slate-400 uppercase">{current.moduleTitle} · Lesson {index + 1} of {lessons.length}</p>
               <h2 className="mt-1 mb-6 text-2xl font-semibold tracking-tight">{current.title}</h2>
 
               {embed && (
-                <div className="mb-8 aspect-video overflow-hidden rounded-xl bg-slate-900 shadow-sm">
-                  <iframe src={embed} className="h-full w-full" title={current.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowFullScreen />
-                </div>
+                <>
+                  <LessonVideoPlayer embedUrl={embed} title={current.title} startAt={startAt} />
+                  <NotesPanel courseId={course.id} lessonId={current.id} hasVideo initialNotes={notes} />
+                </>
               )}
 
               {current.content.trim() && (
                 <article className="prose prose-slate max-w-none prose-headings:font-semibold prose-a:text-brand-600 prose-pre:bg-slate-900"
                   dangerouslySetInnerHTML={{ __html: renderMarkdown(current.content) }} />
               )}
+
+              {!embed && <div className="mt-8"><NotesPanel courseId={course.id} lessonId={current.id} hasVideo={false} initialNotes={notes} /></div>}
 
               <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-6">
                 {prev ? <Link href={`/courses/${course.id}?lesson=${prev.id}`} className="btn btn-ghost">← Previous</Link> : <span />}
@@ -121,7 +134,7 @@ export default async function CoursePlayer({ params, searchParams }: { params: P
                   {next && <Link href={`/courses/${course.id}?lesson=${next.id}`} className={`btn ${isDone ? "btn-primary" : "btn-secondary"}`}>Next →</Link>}
                 </div>
               </div>
-            </>
+            </VideoPlayerProvider>
           )}
         </div>
       </section>

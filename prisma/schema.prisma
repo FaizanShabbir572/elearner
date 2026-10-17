@@ -27,6 +27,7 @@ model User {
   progress         Progress[]
   certificates     Certificate[]
   loginSessions    LoginSession[]
+  notes            LessonNote[]
 }
 
 model Course {
@@ -63,8 +64,24 @@ model Lesson {
   createdAt DateTime   @default(now())
   module    Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   progress  Progress[]
+  notes     LessonNote[]
 
   @@index([moduleId])
+}
+
+model LessonNote {
+  id           String   @id @default(cuid())
+  userId       String
+  lessonId     String
+  timestampSec Int? // video position in seconds; null for lessons without a video
+  content      String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson       Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([userId, lessonId])
+  @@index([userId, updatedAt])
 }
 
 model Progress {

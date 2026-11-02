@@ -14,6 +14,7 @@ const ICONS = {
   home: "M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
   users: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
   book: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14ZM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5",
+  quiz: "M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-6 9 2 2 4-4",
   check: "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11",
   refresh: "M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5",
   notes: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8m8 4H8m2-8H8",
@@ -22,9 +23,11 @@ const ICONS = {
 
 export async function AppShell({ user, children }: { user: CurrentUser; children: React.ReactNode }) {
   const isAdmin = user.role === "ADMIN";
-  const [openActions, overdueActions] = await Promise.all([
+  const [openActions, overdueActions, quizCount] = await Promise.all([
     db.action.count({ where: { userId: user.id, status: { not: "DONE" } } }),
     db.action.count({ where: { userId: user.id, status: { not: "DONE" }, dueDate: { lt: startOfToday() } } }),
+    // Admins: quizzes waiting for review. Students: assigned quizzes not yet submitted.
+    isAdmin ? db.examAssignment.count({ where: { status: "SUBMITTED" } }) : db.examAssignment.count({ where: { userId: user.id, status: "ASSIGNED" } }),
   ]);
   return (
     <div className="min-h-screen md:flex">
@@ -40,6 +43,12 @@ export async function AppShell({ user, children }: { user: CurrentUser; children
             {isAdmin && <p className="hidden px-3 pt-2 pb-1 text-xs font-semibold tracking-wider text-slate-400 uppercase md:block">Admin</p>}
             {isAdmin && <NavLink href="/admin/users"><Icon d={ICONS.users} />Users</NavLink>}
             {isAdmin && <NavLink href="/admin/courses"><Icon d={ICONS.book} />Course builder</NavLink>}
+            {isAdmin && (
+              <NavLink href="/admin/exams">
+                <Icon d={ICONS.quiz} />Quizzes
+                {quizCount > 0 && <span className="ml-auto rounded-full bg-amber-100 px-1.5 text-[11px] font-semibold text-amber-800" title="Awaiting review">{quizCount}</span>}
+              </NavLink>
+            )}
             {isAdmin && <p className="hidden px-3 pt-5 pb-1 text-xs font-semibold tracking-wider text-slate-400 uppercase md:block">Learning</p>}
             <NavLink href="/dashboard"><Icon d={ICONS.home} />{isAdmin ? "Student view" : "My courses"}</NavLink>
             <NavLink href="/notes"><Icon d={ICONS.notes} />My notes</NavLink>
@@ -48,6 +57,12 @@ export async function AppShell({ user, children }: { user: CurrentUser; children
               {openActions > 0 && <span className="ml-auto rounded-full bg-brand-100 px-1.5 text-[11px] font-semibold text-brand-700">{openActions}</span>}
             </NavLink>
             <NavLink href="/revision"><Icon d={ICONS.refresh} />Revision</NavLink>
+            {!isAdmin && (
+              <NavLink href="/quizzes">
+                <Icon d={ICONS.quiz} />My quizzes
+                {quizCount > 0 && <span className="ml-auto rounded-full bg-brand-100 px-1.5 text-[11px] font-semibold text-brand-700">{quizCount}</span>}
+              </NavLink>
+            )}
           </nav>
           <div className="hidden border-t border-slate-200 p-4 md:block">
             <div className="mb-3 flex items-center gap-3">

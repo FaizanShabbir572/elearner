@@ -33,6 +33,7 @@ model User {
   quizAttempts     QuizAttempt[]
   challenges       ChallengeResponse[]
   lessonViews      LessonView[]
+  examAssignments  ExamAssignment[]
 }
 
 model Course {
@@ -231,4 +232,51 @@ model LessonView {
 
   @@unique([userId, lessonId])
   @@index([userId, lastWatchedAt])
+}
+
+// Admin-authored quizzes ("Quizzes" in the UI): written by an admin, assigned to students,
+// and marked pass/fail by an admin. Separate from the auto-generated lesson quizzes above.
+model Exam {
+  id          String           @id @default(cuid())
+  title       String
+  description String           @default("")
+  passMark    Int              @default(60) // % used to suggest pass/fail; the admin decides
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  questions   ExamQuestion[]
+  assignments ExamAssignment[]
+}
+
+model ExamQuestion {
+  id           String   @id @default(cuid())
+  examId       String
+  text         String
+  options      String // JSON array of exactly 4 strings
+  correctIndex Int // 0-3
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  exam         Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@index([examId, order])
+}
+
+model ExamAssignment {
+  id          String    @id @default(cuid())
+  examId      String
+  userId      String
+  status      String    @default("ASSIGNED") // ASSIGNED | SUBMITTED | PASSED | FAILED
+  dueDate     DateTime? // UTC midnight of the chosen day
+  answersJson String    @default("{}") // { [questionId]: optionIndex }; autosaved while ASSIGNED
+  score       Int? // correct answers, computed on submit
+  total       Int?
+  reviewNote  String    @default("")
+  assignedAt  DateTime  @default(now())
+  submittedAt DateTime?
+  reviewedAt  DateTime?
+  exam        Exam      @relation(fields: [examId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, userId])
+  @@index([userId, status])
+  @@index([examId, status])
 }

@@ -32,3 +32,15 @@ export const AI_SUGGESTIONS_PER_DAY = 30;
 export function isActionStatus(v: unknown): v is ActionStatus {
   return typeof v === "string" && (ACTION_STATUSES as readonly string[]).includes(v);
 }
+
+/** Admin-authored quizzes (Exam models). */
+export const EXAM_MIN_QUESTIONS = 1;
+export const EXAM_MAX_QUESTIONS = 100;
+export const EXAM_STATUSES = ["ASSIGNED", "SUBMITTED", "PASSED", "FAILED"] as const;
+export const EXAM_STATUS_LABEL: Record<string, string> = { ASSIGNED: "Not submitted", SUBMITTED: "Awaiting review", PASSED: "Passed", FAILED: "Failed" };
+export const EXAM_STATUS_STYLE: Record<string, string> = {
+  ASSIGNED: "bg-slate-100 text-slate-700",
+  SUBMITTED: "bg-amber-50 text-amber-800 ring-1 ring-amber-200",
+  PASSED: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
+  FAILED: "bg-red-50 text-red-700 ring-1 ring-red-200",
+};

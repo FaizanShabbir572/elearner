@@ -1,6 +1,19 @@
-/** Turns a YouTube or Vimeo watch/share URL into an embeddable iframe URL. Returns null if unrecognised. */
+/** Uploaded lesson videos are served from here (see src/app/api/videos/[file]/route.ts). */
+export const UPLOADED_VIDEO_PREFIX = "/api/videos/";
+export const UPLOADED_VIDEO_NAME = /^[a-z0-9]+\.(mp4|webm|m4v|mov|ogv)$/;
+
+/** True for a path like /api/videos/abc123.mp4 produced by the upload endpoint. */
+export function isUploadedVideo(raw: string | null | undefined): boolean {
+  return !!raw && raw.startsWith(UPLOADED_VIDEO_PREFIX) && UPLOADED_VIDEO_NAME.test(raw.slice(UPLOADED_VIDEO_PREFIX.length));
+}
+
+/**
+ * Turns a YouTube or Vimeo watch/share URL into an embeddable iframe URL. Uploaded video paths are
+ * returned unchanged. Returns null if unrecognised.
+ */
 export function toEmbedUrl(raw: string | null | undefined): string | null {
   if (!raw) return null;
+  if (isUploadedVideo(raw.trim())) return raw.trim();
   let url: URL;
   try {
     url = new URL(raw.trim());
@@ -30,10 +43,11 @@ export function toEmbedUrl(raw: string | null | undefined): string | null {
   return null;
 }
 
-export type VideoProvider = "youtube" | "vimeo";
+export type VideoProvider = "youtube" | "vimeo" | "file";
 
 /** Which player API can control this embed URL (from toEmbedUrl). */
 export function videoProvider(embedUrl: string): VideoProvider | null {
+  if (isUploadedVideo(embedUrl)) return "file";
   if (embedUrl.startsWith("https://www.youtube-nocookie.com/embed/")) return "youtube";
   if (embedUrl.startsWith("https://player.vimeo.com/video/")) return "vimeo";
   return null;

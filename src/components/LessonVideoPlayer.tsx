@@ -179,14 +179,31 @@ async function connectVimeo(iframe: HTMLIFrameElement): Promise<Controller> {
   };
 }
 
+// ---------- Uploaded file (<video>) ----------
+
+async function connectFile(video: HTMLVideoElement): Promise<Controller> {
+  return {
+    getCurrentTime: async () => video.currentTime,
+    getDuration: async () => (Number.isFinite(video.duration) && video.duration) || null,
+    isPlaying: async () => !video.paused && !video.ended,
+    seekTo: (s) => {
+      video.currentTime = s;
+    },
+    play: () => void video.play().catch(() => {}),
+    pause: () => video.pause(),
+  };
+}
+
 // ---------- Player ----------
 
 const CONNECT_TIMEOUT_MS = 10_000;
 const PROGRESS_INTERVAL_MS = 10_000;
 // Neither player API supports a clean detach (destroy() removes the iframe), so connect once per element.
-const connections = new WeakMap<HTMLIFrameElement, Promise<Controller>>();
+const connections = new WeakMap<HTMLElement, Promise<Controller>>();
 
 function withStart(embedUrl: string, provider: ReturnType<typeof videoProvider>, startAt?: number | null) {
+  // Uploaded files are same-origin paths; a media fragment sets the start time.
+  if (provider === "file") return startAt ? `${embedUrl}#t=${startAt}` : embedUrl;
   const url = new URL(embedUrl);
   if (provider === "youtube") {
     url.searchParams.set("enablejsapi", "1");
@@ -200,22 +217,24 @@ function withStart(embedUrl: string, provider: ReturnType<typeof videoProvider>,
 export function LessonVideoPlayer({ embedUrl, title, startAt }: { embedUrl: string; title: string; startAt?: number | null }) {
   const ctx = useContext(Ctx);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const provider = videoProvider(embedUrl);
   const src = withStart(embedUrl, provider, startAt);
 
   useEffect(() => {
-    const iframe = iframeRef.current;
-    if (!iframe || !provider || !ctx) return;
+    const el = provider === "file" ? videoRef.current : iframeRef.current;
+    if (!el || !provider || !ctx) return;
     let cancelled = false;
     let timer: ReturnType<typeof setInterval> | undefined;
 
-    let connection = connections.get(iframe);
+    let connection = connections.get(el);
     if (!connection) {
       connection = Promise.race([
-        provider === "youtube" ? connectYouTube(iframe) : connectVimeo(iframe),
+        el instanceof HTMLVideoElement ? connectFile(el)
+          : provider === "youtube" ? connectYouTube(el as HTMLIFrameElement) : connectVimeo(el as HTMLIFrameElement),
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Player API timed out")), CONNECT_TIMEOUT_MS)),
       ]);
-      connections.set(iframe, connection);
+      connections.set(el, connection);
     }
 
     connection
@@ -234,7 +253,7 @@ export function LessonVideoPlayer({ embedUrl, title, startAt }: { embedUrl: stri
       })
       .catch(() => {
         // Fallback: the plain iframe still plays, timestamps become null.
-        connections.delete(iframe);
+        connections.delete(el);
       });
 
     return () => {
@@ -246,9 +265,14 @@ export function LessonVideoPlayer({ embedUrl, title, startAt }: { embedUrl: stri
 
   return (
     <div ref={ctx?._container} className="mb-8 aspect-video scroll-mt-6 overflow-hidden rounded-xl bg-slate-900 shadow-sm">
-      {/* key: a new start time means a fresh iframe (and a fresh API connection). */}
-      <iframe key={src} ref={iframeRef} src={src} className="h-full w-full" title={title}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowFullScreen />
+      {/* key: a new start time means a fresh element (and a fresh API connection). */}
+      {provider === "file" ? (
+        <video key={src} ref={videoRef} src={src} className="h-full w-full" title={title} controls playsInline preload="metadata"
+          controlsList="nodownload" onContextMenu={(e) => e.preventDefault()} />
+      ) : (
+        <iframe key={src} ref={iframeRef} src={src} className="h-full w-full" title={title}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowFullScreen />
+      )}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { isLevel } from "@/lib/constants";
 import { toEmbedUrl } from "@/lib/video";
+import { removeUnusedVideos } from "@/lib/video-storage";
 
 const str = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 
@@ -55,7 +56,10 @@ export async function updateCourse(form: FormData) {
 
 export async function deleteCourse(form: FormData) {
   await requireAdmin();
-  await db.course.delete({ where: { id: str(form, "id") } });
+  const id = str(form, "id");
+  const videos = await db.lesson.findMany({ where: { module: { courseId: id } }, select: { videoUrl: true } });
+  await db.course.delete({ where: { id } });
+  await removeUnusedVideos(videos.map((l) => l.videoUrl));
   revalidatePath("/admin/courses");
   revalidatePath("/dashboard");
   redirect("/admin/courses");
@@ -83,7 +87,8 @@ export async function renameModule(form: FormData) {
 
 export async function deleteModule(form: FormData) {
   await requireAdmin();
-  const mod = await db.module.delete({ where: { id: str(form, "id") } });
+  const mod = await db.module.delete({ where: { id: str(form, "id") }, include: { lessons: { select: { videoUrl: true } } } });
+  await removeUnusedVideos(mod.lessons.map((l) => l.videoUrl));
   refresh(mod.courseId);
 }
 
@@ -133,13 +138,15 @@ export async function updateLesson(_: { error?: string } | undefined, form: Form
   const videoUrl = str(form, "videoUrl") || null;
   if (!title) return { error: "Title is required." };
   if (videoUrl && !toEmbedUrl(videoUrl)) {
-    return { error: "Video link must be a YouTube or Vimeo URL (e.g. https://www.youtube.com/watch?v=… or https://vimeo.com/123456)." };
+    return { error: "Video must be an uploaded file or a YouTube or Vimeo URL (e.g. https://www.youtube.com/watch?v=… or https://vimeo.com/123456)." };
   }
+  const before = await db.lesson.findUnique({ where: { id }, select: { videoUrl: true } });
   const lesson = await db.lesson.update({
     where: { id },
     data: { title, content: String(form.get("content") ?? ""), videoUrl, transcript: String(form.get("transcript") ?? "") },
     include: { module: true },
   });
+  if (before?.videoUrl !== videoUrl) await removeUnusedVideos([before?.videoUrl]);
   refresh(lesson.module.courseId);
   redirect(`/admin/courses/${lesson.module.courseId}?saved=${lesson.id}`);
 }
@@ -147,6 +154,7 @@ export async function updateLesson(_: { error?: string } | undefined, form: Form
 export async function deleteLesson(form: FormData) {
   await requireAdmin();
   const lesson = await db.lesson.delete({ where: { id: str(form, "id") }, include: { module: true } });
+  await removeUnusedVideos([lesson.videoUrl]);
   refresh(lesson.module.courseId);
   redirect(`/admin/courses/${lesson.module.courseId}`);
 }

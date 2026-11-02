@@ -24,5 +24,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   runtime: "nodejs",
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // The video upload endpoint is excluded: middleware buffers request bodies (10 MB cap), and
+  // the route checks for an admin session itself.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/admin/videos).*)"],
 };

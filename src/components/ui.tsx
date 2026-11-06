@@ -50,6 +50,15 @@ export function EmptyState({ title, children }: { title: string; children?: Reac
   );
 }
 
+/** Shown in the content area while a page loads; the sidebar stays in place. */
+export function PageLoader() {
+  return (
+    <div className="grid min-h-[60vh] place-items-center" role="status" aria-label="Loading">
+      <span className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-brand-600 motion-reduce:animate-none" />
+    </div>
+  );
+}
+
 export function Logo() {
   return (
     <span className="flex items-center gap-2 font-semibold tracking-tight text-slate-900">

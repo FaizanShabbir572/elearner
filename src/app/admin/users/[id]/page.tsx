@@ -5,16 +5,25 @@ import { END_REASON_LABEL, formatDate, formatDateTime, formatDuration, isActiveN
 import { issueCertificate, revokeCertificate } from "@/app/actions/admin-users";
 import { EmptyState, LevelBadge, PageHeader, ProgressBar, StatusBadge } from "@/components/ui";
 import { ConfirmButton, SubmitButton } from "@/components/SubmitButton";
+import { ReminderComposer } from "@/components/ReminderForms";
+import { getCourseCoverage, unfinishedCourses } from "@/lib/course-coverage";
+import { emailConfigured } from "@/lib/email";
 import { getStudentStats, statCards } from "@/lib/student-stats";
 
 export const metadata = { title: "Student details" };
+
+const EMAIL_STATUS_LABEL: Record<string, string> = {
+  SENT: "Email sent",
+  FAILED: "Email failed",
+  NOT_CONFIGURED: "Email not sent (not set up)",
+};
 
 export default async function UserDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const user = await db.user.findUnique({ where: { id } });
   if (!user) notFound();
 
-  const [sessions, progress, certs, allCourses, learning] = await Promise.all([
+  const [sessions, progress, certs, allCourses, learning, coverageByUser, reminders] = await Promise.all([
     db.loginSession.findMany({ where: { userId: id }, orderBy: { startedAt: "desc" } }),
     db.progress.findMany({
       where: { userId: id },
@@ -23,7 +32,11 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
     db.certificate.findMany({ where: { userId: id } }),
     db.course.findMany({ orderBy: { createdAt: "asc" }, select: { id: true, title: true, published: true } }),
     getStudentStats(user),
+    getCourseCoverage([user]),
+    db.notification.findMany({ where: { userId: id }, orderBy: { createdAt: "desc" }, take: 20 }),
   ]);
+  const coverage = coverageByUser.get(id);
+  const unfinished = unfinishedCourses(coverage);
 
   // Courses to show: published ones on the user's track, plus anything they've touched or been certified for.
   const touchedIds = [...new Set([...progress.map((p) => p.lesson.module.courseId), ...certs.map((c) => c.courseId)])];
@@ -100,7 +113,12 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
       </section>
 
       <section className="mb-10">
-        <h2 className="mb-4 font-semibold">Course progress</h2>
+        <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-semibold">Course progress</h2>
+          {coverage && coverage.total > 0 && (
+            <p className="text-sm text-slate-500">Overall on their track: <strong className="text-slate-700">{coverage.percent}%</strong> ({coverage.done} of {coverage.total} lessons)</p>
+          )}
+        </div>
         {rows.length === 0 ? (
           <EmptyState title="No courses yet">There are no published courses for this user's level and they haven't started any course.</EmptyState>
         ) : (
@@ -181,6 +199,32 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
           </form>
         )}
       </section>
+
+      {(unfinished.length > 0 || reminders.length > 0) && (
+        <section className="mb-10">
+          <h2 className="mb-4 font-semibold">Reminders</h2>
+          {unfinished.length > 0 && <ReminderComposer userId={user.id} courses={unfinished} emailReady={emailConfigured()} />}
+          {reminders.length > 0 && (
+            <ul className="card mt-4 divide-y divide-slate-100">
+              {reminders.map((n) => (
+                <li key={n.id} className="px-5 py-3.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm font-medium text-slate-900">{n.title}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className={`badge ${n.readAt ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>{n.readAt ? `Read ${formatDate(n.readAt)}` : "Unread"}</span>
+                      {n.emailStatus && (
+                        <span className={`badge ${n.emailStatus === "SENT" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>{EMAIL_STATUS_LABEL[n.emailStatus] ?? n.emailStatus}</span>
+                      )}
+                    </div>
+                  </div>
+                  <p className="mt-1 text-sm whitespace-pre-wrap text-slate-600">{n.message}</p>
+                  <p className="mt-1 text-xs text-slate-500">{formatDateTime(n.createdAt)}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       <section>
         <h2 className="mb-4 font-semibold">Login history <span className="text-sm font-normal text-slate-500">(last 50)</span></h2>

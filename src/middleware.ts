@@ -4,7 +4,7 @@ import { SESSION_COOKIE, verifySession } from "@/lib/session";
 // Coarse gate: must be signed in for protected areas. Fine-grained checks
 // (role, APPROVED status) happen server-side in each layout against the DB,
 // so an approval or rejection takes effect on the very next request.
-const PROTECTED = ["/dashboard", "/courses", "/notes", "/actions", "/revision", "/quizzes", "/admin", "/pending", "/certificates"];
+const PROTECTED = ["/dashboard", "/courses", "/notes", "/actions", "/revision", "/quizzes", "/notifications", "/admin", "/pending", "/certificates"];
 const AUTH_PAGES = ["/login", "/register"];
 
 export async function middleware(req: NextRequest) {

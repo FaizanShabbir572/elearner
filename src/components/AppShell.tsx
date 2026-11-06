@@ -18,16 +18,18 @@ const ICONS = {
   check: "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11",
   refresh: "M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5",
   notes: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8m8 4H8m2-8H8",
+  bell: "M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0",
   logout: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m7 14 5-5-5-5m5 5H9",
 };
 
 export async function AppShell({ user, children }: { user: CurrentUser; children: React.ReactNode }) {
   const isAdmin = user.role === "ADMIN";
-  const [openActions, overdueActions, quizCount] = await Promise.all([
+  const [openActions, overdueActions, quizCount, unreadNotifications] = await Promise.all([
     db.action.count({ where: { userId: user.id, status: { not: "DONE" } } }),
     db.action.count({ where: { userId: user.id, status: { not: "DONE" }, dueDate: { lt: startOfToday() } } }),
     // Admins: quizzes waiting for review. Students: assigned quizzes not yet submitted.
     isAdmin ? db.examAssignment.count({ where: { status: "SUBMITTED" } }) : db.examAssignment.count({ where: { userId: user.id, status: "ASSIGNED" } }),
+    isAdmin ? 0 : db.notification.count({ where: { userId: user.id, readAt: null } }),
   ]);
   return (
     <div className="min-h-screen md:flex">
@@ -63,6 +65,12 @@ export async function AppShell({ user, children }: { user: CurrentUser; children
                 {quizCount > 0 && <span className="ml-auto rounded-full bg-brand-100 px-1.5 text-[11px] font-semibold text-brand-700">{quizCount}</span>}
               </NavLink>
             )}
+            {!isAdmin && (
+              <NavLink href="/notifications">
+                <Icon d={ICONS.bell} />Notifications
+                {unreadNotifications > 0 && <span className="ml-auto rounded-full bg-brand-600 px-1.5 text-[11px] font-semibold text-white">{unreadNotifications}</span>}
+              </NavLink>
+            )}
           </nav>
           <div className="hidden border-t border-slate-200 p-4 md:block">
             <div className="mb-3 flex items-center gap-3">
@@ -82,6 +90,11 @@ export async function AppShell({ user, children }: { user: CurrentUser; children
         </div>
       </aside>
       <main className="min-w-0 flex-1">
+        {unreadNotifications > 0 && (
+          <Link href="/notifications" className="block border-b border-brand-100 bg-brand-50 px-5 py-2 text-center text-sm text-brand-700 hover:bg-brand-100 md:px-10">
+            You have {unreadNotifications} new notification{unreadNotifications === 1 ? "" : "s"} from your instructor — <span className="font-medium underline">read now</span>
+          </Link>
+        )}
         {overdueActions > 0 && (
           <Link href="/actions" className="block border-b border-red-200 bg-red-50 px-5 py-2 text-center text-sm text-red-800 hover:bg-red-100 md:px-10">
             You have {overdueActions} overdue action{overdueActions === 1 ? "" : "s"} — <span className="font-medium underline">review them</span>
@@ -89,7 +102,7 @@ export async function AppShell({ user, children }: { user: CurrentUser; children
         )}
         {children}
       </main>
-      <Heartbeat />
+      <Heartbeat unread={unreadNotifications} />
     </div>
   );
 }

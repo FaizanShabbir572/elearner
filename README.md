@@ -14,7 +14,7 @@ Requires Node.js 20+.
 cp .env.example .env        # then set AUTH_SECRET to a long random string
 npm install                 # also generates the Prisma client
 npm run setup               # creates prisma/dev.db, seeds an admin + 2 sample courses
-npm run dev                 # http://localhost:3000
+npm run dev                 # http://localhost:4600
 ```
 
 Log in as the seeded admin: **admin@example.com / admin12345** (change via `SEED_ADMIN_*` in `.env`
@@ -31,6 +31,8 @@ before running `setup`, and change the password afterwards in production).
 | Course player: video, Markdown reading, mark complete, % progress | `/courses/[id]` |
 | Last lesson completed → certificate issued + completion email with download link | `src/lib/progress.ts` |
 | PDF certificate (owner or admin only) | `/certificates/[id]`, `src/lib/certificate-pdf.ts` |
+| Admin sees each student's course coverage and sends reminders to finish a course, in the app (and by email once a provider is set up) | `/admin/users`, `src/lib/course-coverage.ts`, `src/app/actions/admin-notifications.ts` |
+| Students read reminders in the app; new ones appear within a minute without a reload | `/notifications`, `src/components/Heartbeat.tsx` |
 
 Access control: `src/middleware.ts` blocks signed-out users; each layout re-checks role and
 approval status against the database, so approving or rejecting someone takes effect on their next click.
@@ -44,6 +46,13 @@ Set **one** of these in `.env`:
 
 With neither set, emails are printed to the server console — handy in development.
 `ADMIN_EMAIL` receives new-registration alerts; `APP_URL` is used for links inside emails.
+
+## Lesson videos
+
+Set `BUNNY_STORAGE_ENDPOINT` and `BUNNY_STORAGE_KEY` in `.env` to store uploads in Bunny Storage,
+in a `lesson-videos` folder. Without them, uploads stay on this server's disk. Either way students
+play videos through `/api/videos`, which checks they can open the lesson, so the storage key never
+reaches the browser. Videos already on disk keep playing from there.
 
 ## Production notes
 

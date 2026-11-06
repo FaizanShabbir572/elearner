@@ -34,3 +34,26 @@
   .btn-sm { @apply px-2.5 py-1.5 text-xs; }
   .badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
 }
+
+/* Top-of-page request indicator (see AppLoader). */
+.app-loader {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  height: 3px;
+  overflow: hidden;
+  background: var(--color-brand-100);
+}
+.app-loader-bar {
+  height: 100%;
+  width: 40%;
+  background: var(--color-brand-600);
+  animation: app-loader-slide 1s ease-in-out infinite;
+}
+@keyframes app-loader-slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-loader-bar { width: 100%; animation: none; }
+}

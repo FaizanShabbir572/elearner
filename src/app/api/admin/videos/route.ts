@@ -7,13 +7,13 @@ import { pipeline } from "node:stream/promises";
 import type { ReadableStream as WebReadableStream } from "node:stream/web";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { VIDEO_DIR, VIDEO_MAX_BYTES, VIDEO_TYPES } from "@/lib/video-storage";
+import { VIDEO_DIR, VIDEO_MAX_BYTES, VIDEO_TYPES, bunnyEnabled, deleteFromBunny, uploadToBunny } from "@/lib/video-storage";
 import { UPLOADED_VIDEO_PREFIX } from "@/lib/video";
 
 /**
  * Admin video upload. The raw file is the request body (not multipart) so it streams straight to
- * disk; the original file name comes in the X-File-Name header. Responds with { url } to store
- * as the lesson's videoUrl.
+ * Bunny Storage, or to disk if Bunny isn't configured; the original file name comes in the
+ * X-File-Name header. Responds with { url } to store as the lesson's videoUrl.
  */
 export async function POST(req: Request) {
   const user = await getCurrentUser();
@@ -29,9 +29,10 @@ export async function POST(req: Request) {
   if (declared > VIDEO_MAX_BYTES) return tooLarge();
   if (!req.body) return NextResponse.json({ error: "The file is empty." }, { status: 400 });
 
-  await mkdir(VIDEO_DIR, { recursive: true });
   const name = `${Date.now().toString(36)}${randomBytes(8).toString("hex")}.${ext}`;
   const dest = path.join(VIDEO_DIR, name);
+  const toBunny = bunnyEnabled();
+  const discard = () => (toBunny ? deleteFromBunny(name) : unlink(dest)).catch(() => {});
 
   let received = 0;
   const limit = new Transform({
@@ -41,16 +42,22 @@ export async function POST(req: Request) {
     },
   });
 
+  const source = Readable.fromWeb(req.body as WebReadableStream<Uint8Array>);
   try {
-    await pipeline(Readable.fromWeb(req.body as WebReadableStream<Uint8Array>), limit, createWriteStream(dest));
+    if (toBunny) {
+      await pipeline(source, limit, (stored: AsyncIterable<Uint8Array>) => uploadToBunny(name, stored));
+    } else {
+      await mkdir(VIDEO_DIR, { recursive: true });
+      await pipeline(source, limit, createWriteStream(dest));
+    }
   } catch (err) {
-    await unlink(dest).catch(() => {});
+    await discard();
     if ((err as Error).message === "TOO_LARGE") return tooLarge();
     console.error("Video upload failed", err);
     return NextResponse.json({ error: "Upload failed. Please try again." }, { status: 500 });
   }
   if (received === 0) {
-    await unlink(dest).catch(() => {});
+    await discard();
     return NextResponse.json({ error: "The file is empty." }, { status: 400 });
   }
 

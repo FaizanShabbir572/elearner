@@ -34,6 +34,7 @@ model User {
   challenges       ChallengeResponse[]
   lessonViews      LessonView[]
   examAssignments  ExamAssignment[]
+  notifications    Notification[]
 }
 
 model Course {
@@ -46,6 +47,7 @@ model Course {
   updatedAt        DateTime      @updatedAt
   modules          Module[]
   certificates     Certificate[]
+  notifications    Notification[]
 }
 
 model Module {
@@ -232,6 +234,23 @@ model LessonView {
 
   @@unique([userId, lessonId])
   @@index([userId, lastWatchedAt])
+}
+
+// A message from an admin to one student, shown in the app and optionally emailed.
+model Notification {
+  id          String    @id @default(cuid())
+  userId      String
+  courseId    String?
+  title       String
+  message     String
+  emailStatus String? // SENT | FAILED | NOT_CONFIGURED; null when no email was requested
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course      Course?   @relation(fields: [courseId], references: [id], onDelete: SetNull)
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
 }
 
 // Admin-authored quizzes ("Quizzes" in the UI): written by an admin, assigned to students,

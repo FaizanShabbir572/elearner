@@ -2,15 +2,17 @@ import "server-only";
 import nodemailer from "nodemailer";
 
 type Mail = { to: string; subject: string; html: string };
+export type EmailStatus = "SENT" | "FAILED" | "NOT_CONFIGURED";
 
 const from = () => process.env.EMAIL_FROM || "E-Learning <no-reply@example.com>";
-export const appUrl = () => (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+export const appUrl = () => (process.env.APP_URL || "http://localhost:4600").replace(/\/$/, "");
 
 /**
  * Sends an email via Resend (if RESEND_API_KEY is set), otherwise SMTP (if SMTP_HOST is set),
  * otherwise logs it to the console. Never throws — a failed email must not break the user's action.
+ * Returns what happened, for callers that need to tell the admin.
  */
-export async function sendEmail(mail: Mail): Promise<void> {
+export async function sendEmail(mail: Mail): Promise<EmailStatus> {
   try {
     if (process.env.RESEND_API_KEY) {
       const res = await fetch("https://api.resend.com/emails", {
@@ -21,8 +23,9 @@ export async function sendEmail(mail: Mail): Promise<void> {
         },
         body: JSON.stringify({ from: from(), to: [mail.to], subject: mail.subject, html: mail.html }),
       });
-      if (!res.ok) console.error("[email] Resend error", res.status, await res.text());
-      return;
+      if (res.ok) return "SENT";
+      console.error("[email] Resend error", res.status, await res.text());
+      return "FAILED";
     }
     if (process.env.SMTP_HOST) {
       const port = Number(process.env.SMTP_PORT || 587);
@@ -33,13 +36,18 @@ export async function sendEmail(mail: Mail): Promise<void> {
         auth: process.env.SMTP_USER ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } : undefined,
       });
       await transport.sendMail({ from: from(), ...mail });
-      return;
+      return "SENT";
     }
     console.log(`\n[email:console] To: ${mail.to}\nSubject: ${mail.subject}\n${mail.html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()}\n`);
+    return "NOT_CONFIGURED";
   } catch (err) {
     console.error("[email] failed to send", err);
+    return "FAILED";
   }
 }
+
+/** Whether emails will actually leave the server, rather than print to the console. */
+export const emailConfigured = () => Boolean(process.env.RESEND_API_KEY || process.env.SMTP_HOST);
 
 const esc = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
@@ -73,6 +81,21 @@ export function approvalEmail(user: { name: string; email: string }, levelLabel:
       `Welcome aboard, ${user.name}!`,
       `<p>Your account has been approved and assigned to the <strong>${esc(levelLabel)}</strong> track. Your courses are ready.</p>`,
       { href: `${appUrl()}/dashboard`, label: "Start learning" }
+    ),
+  });
+}
+
+export function reminderEmail(
+  user: { name: string; email: string },
+  reminder: { title: string; message: string; courseId: string }
+) {
+  return sendEmail({
+    to: user.email,
+    subject: reminder.title,
+    html: layout(
+      reminder.title,
+      `<p>Hi ${esc(user.name)},</p><p>${esc(reminder.message).replace(/\n/g, "<br>")}</p>`,
+      { href: `${appUrl()}/courses/${reminder.courseId}`, label: "Continue course" }
     ),
   });
 }

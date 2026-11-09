@@ -81,20 +81,20 @@ export default async function NotesPage({ searchParams }: { searchParams: Promis
               <div className="space-y-4">
                 {[...g.lessons.entries()].map(([lessonId, l]) => (
                   <div key={lessonId} className="card">
-                    <Link href={`/courses/${g.id}?lesson=${lessonId}`} className="block border-b border-slate-100 px-5 py-3 text-sm font-medium text-slate-900 hover:text-brand-600">
+                    <Link href={`/courses/${g.id}?lesson=${lessonId}`} className="block border-b border-line/70 px-5 py-3 text-sm font-medium text-ink hover:text-brand-600">
                       {l.title}
                     </Link>
-                    <ul className="divide-y divide-slate-100">
+                    <ul className="divide-y divide-line/70">
                       {l.notes.map((n) => (
                         <li key={n.id} className="px-5 py-3">
                           <Link href={`/courses/${g.id}?lesson=${lessonId}${n.timestampSec !== null ? `&t=${n.timestampSec}` : ""}`}
                             className="group flex gap-3">
-                            <span className={`badge h-fit shrink-0 font-mono ${n.timestampSec !== null ? "bg-brand-50 text-brand-700" : "bg-slate-100 text-slate-500"}`}>
+                            <span className={`badge h-fit shrink-0 font-mono ${n.timestampSec !== null ? "bg-brand-50 text-brand-700" : "bg-surface-3 text-muted"}`}>
                               {n.timestampSec !== null ? `▶ ${formatTimestamp(n.timestampSec)}` : "Note"}
                             </span>
                             <span className="min-w-0 flex-1">
-                              <span className="line-clamp-3 text-sm break-words whitespace-pre-wrap text-slate-700 group-hover:text-slate-900">{n.content}</span>
-                              <span className="mt-1 block text-xs text-slate-400">Updated {formatDateTime(n.updatedAt)}</span>
+                              <span className="line-clamp-3 text-sm break-words whitespace-pre-wrap text-ink-2 group-hover:text-ink">{n.content}</span>
+                              <span className="mt-1 block text-xs text-faint">Updated {formatDateTime(n.updatedAt)}</span>
                             </span>
                           </Link>
                           <StatefulNoteActionsRow note={{ id: n.id, content: n.content }} initialActions={actions.filter((a) => a.noteId === n.id)} aiEnabled={isAiEnabled()} />
@@ -112,7 +112,7 @@ export default async function NotesPage({ searchParams }: { searchParams: Promis
       {pages > 1 && (
         <nav className="mt-8 flex items-center justify-between text-sm" aria-label="Pagination">
           {page > 1 ? <Link href={pageHref(page - 1)} className="btn btn-secondary btn-sm">← Newer</Link> : <span />}
-          <span className="text-slate-500">Page {page} of {pages}</span>
+          <span className="text-muted">Page {page} of {pages}</span>
           {page < pages ? <Link href={pageHref(page + 1)} className="btn btn-secondary btn-sm">Older →</Link> : <span />}
         </nav>
       )}

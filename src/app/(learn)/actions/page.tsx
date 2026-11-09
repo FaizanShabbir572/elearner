@@ -66,8 +66,8 @@ export default async function ActionsPage({ searchParams }: { searchParams: Prom
       {highlighted && (
         <section className="mb-8">
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-500">Selected action</h2>
-            <Link href={href(tab.key)} className="text-xs text-slate-500 hover:text-slate-800">Dismiss</Link>
+            <h2 className="text-sm font-semibold text-muted">Selected action</h2>
+            <Link href={href(tab.key)} className="text-xs text-muted hover:text-ink">Dismiss</Link>
           </div>
           <ActionCard action={toCardData(highlighted, today)} highlighted />
         </section>
@@ -76,9 +76,9 @@ export default async function ActionsPage({ searchParams }: { searchParams: Prom
       <nav className="mb-5 flex gap-1.5 overflow-x-auto pb-1" aria-label="Action status">
         {TABS.map((t) => (
           <Link key={t.key} href={href(t.key)}
-            className={`btn btn-sm shrink-0 ${t.key === tab.key ? "bg-slate-900 text-white" : "btn-secondary"}`}>
+            className={`btn btn-sm shrink-0 ${t.key === tab.key ? "btn-active" : "btn-secondary"}`}>
             {t.label}
-            <span className={`rounded-full px-1.5 text-[11px] ${t.key === tab.key ? "bg-white/20" : "bg-slate-100"}`}>{tabCount[t.key]}</span>
+            <span className={`rounded-full px-1.5 text-[11px] ${t.key === tab.key ? "bg-white/20" : "bg-surface-3"}`}>{tabCount[t.key]}</span>
           </Link>
         ))}
       </nav>
@@ -100,7 +100,7 @@ export default async function ActionsPage({ searchParams }: { searchParams: Prom
       {pages > 1 && (
         <nav className="mt-8 flex items-center justify-between text-sm" aria-label="Pagination">
           {page > 1 ? <Link href={href(tab.key, page - 1)} className="btn btn-secondary btn-sm">← Previous</Link> : <span />}
-          <span className="text-slate-500">Page {page} of {pages}</span>
+          <span className="text-muted">Page {page} of {pages}</span>
           {page < pages ? <Link href={href(tab.key, page + 1)} className="btn btn-secondary btn-sm">Next →</Link> : <span />}
         </nav>
       )}

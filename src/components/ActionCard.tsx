@@ -9,7 +9,7 @@ import { ConfirmButton, SubmitButton } from "./SubmitButton";
 const DUE_STYLE = {
   overdue: "bg-red-50 text-red-700 ring-1 ring-red-200",
   soon: "bg-amber-50 text-amber-800 ring-1 ring-amber-200",
-  later: "bg-slate-100 text-slate-600",
+  later: "bg-surface-3 text-muted",
 } as const;
 
 const CARD_ACCENT = { overdue: "border-l-4 border-l-red-500", soon: "border-l-4 border-l-amber-400", later: "" } as const;
@@ -44,24 +44,24 @@ export function ActionCard({ action, highlighted = false }: { action: ActionCard
 
   return (
     <article id={`action-${a.id}`}
-      className={`card scroll-mt-6 p-4 ${a.dueState ? CARD_ACCENT[a.dueState] : ""} ${highlighted ? "ring-2 ring-brand-500" : ""} ${a.status === "DONE" ? "bg-slate-50/60" : ""}`}>
+      className={`card scroll-mt-6 p-4 ${a.dueState ? CARD_ACCENT[a.dueState] : ""} ${highlighted ? "ring-2 ring-brand-500" : ""} ${a.status === "DONE" ? "bg-surface-2/60" : ""}`}>
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <h3 className={`min-w-0 flex-1 font-medium break-words ${a.status === "DONE" ? "text-slate-500 line-through" : "text-slate-900"}`}>{a.title}</h3>
+        <h3 className={`min-w-0 flex-1 font-medium break-words ${a.status === "DONE" ? "text-muted line-through" : "text-ink"}`}>{a.title}</h3>
         <div className="flex flex-wrap gap-1.5">
-          {a.source === "AI" && <span className="badge bg-violet-50 text-violet-700">AI suggested</span>}
+          {a.source === "AI" && <span className="badge bg-cyan/10 text-cyan">AI suggested</span>}
           {a.status === "IN_PROGRESS" && <span className="badge bg-sky-50 text-sky-700">In progress</span>}
-          {a.dueText && <span className={`badge ${a.dueState ? DUE_STYLE[a.dueState] : "bg-slate-100 text-slate-600"}`}>{a.dueText}</span>}
+          {a.dueText && <span className={`badge ${a.dueState ? DUE_STYLE[a.dueState] : "bg-surface-3 text-muted"}`}>{a.dueText}</span>}
         </div>
       </div>
-      {a.description && <p className="mt-1.5 text-sm break-words whitespace-pre-wrap text-slate-600">{a.description}</p>}
+      {a.description && <p className="mt-1.5 text-sm break-words whitespace-pre-wrap text-muted">{a.description}</p>}
       {(a.from || a.noteDeleted) && (
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 text-xs text-muted">
           {a.from && <>From <Link href={a.from.href} className="font-medium text-brand-600 hover:underline">{a.from.label}</Link></>}
           {a.from && a.noteDeleted && " · "}
           {a.noteDeleted && <span className="italic">Source note deleted</span>}
         </p>
       )}
-      {a.completedText && <p className="mt-2 text-xs text-slate-400">{a.completedText}</p>}
+      {a.completedText && <p className="mt-2 text-xs text-faint">{a.completedText}</p>}
 
       <div className="mt-3 flex flex-wrap items-center gap-1.5">
         {a.status === "TODO" && <StatusButton id={a.id} status="IN_PROGRESS">Start</StatusButton>}
@@ -118,12 +118,12 @@ export function ActionFieldsForm({ initial, submitLabel, onSubmit, onDone, onCan
         <input id={`${id}-title`} className="input" value={title} onChange={(e) => setTitle(e.target.value)} required maxLength={ACTION_TITLE_MAX} placeholder="e.g. Practise marking support levels on 3 charts" />
       </div>
       <div>
-        <label className="label" htmlFor={`${id}-desc`}>Description <span className="font-normal text-slate-400">(optional)</span></label>
+        <label className="label" htmlFor={`${id}-desc`}>Description <span className="font-normal text-faint">(optional)</span></label>
         <textarea id={`${id}-desc`} className="input min-h-20 resize-y" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={ACTION_DESCRIPTION_MAX} />
       </div>
       <div className="flex flex-wrap items-end gap-3">
         <div>
-          <label className="label" htmlFor={`${id}-due`}>Target date <span className="font-normal text-slate-400">(optional)</span></label>
+          <label className="label" htmlFor={`${id}-due`}>Target date <span className="font-normal text-faint">(optional)</span></label>
           <div className="flex items-center gap-2">
             <input id={`${id}-due`} type="date" className="input w-auto" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
             {dueDate && <button type="button" className="btn btn-ghost btn-sm" onClick={() => setDueDate("")}>Clear</button>}

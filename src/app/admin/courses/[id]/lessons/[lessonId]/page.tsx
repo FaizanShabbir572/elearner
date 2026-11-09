@@ -15,11 +15,11 @@ export default async function EditLessonPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="max-w-3xl">
-      <Link href={`/admin/courses/${id}`} className="text-sm text-slate-500 hover:text-slate-800">← {lesson.module.course.title}</Link>
+      <Link href={`/admin/courses/${id}`} className="text-sm text-muted hover:text-ink">← {lesson.module.course.title}</Link>
       <div className="mt-1 mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-xs font-medium tracking-wide text-slate-400 uppercase">{lesson.module.title}</p>
-          <h1 className="text-2xl font-semibold tracking-tight">Edit lesson</h1>
+          <p className="text-xs font-medium tracking-wide text-faint uppercase">{lesson.module.title}</p>
+          <h1 className="heading-accent text-2xl font-bold tracking-tight">Edit lesson</h1>
         </div>
         <form action={deleteLesson}>
           <input type="hidden" name="id" value={lesson.id} />

@@ -15,8 +15,8 @@ export async function QuizPreview({ lessonId }: { lessonId: string }) {
     <section className="card mt-8 p-5">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="font-semibold">Auto-generated quiz <span className="text-sm font-normal text-slate-400">(optional preview)</span></h2>
-          <p className="mt-0.5 text-sm text-slate-500">
+          <h2 className="font-semibold">Auto-generated quiz <span className="text-sm font-normal text-faint">(optional preview)</span></h2>
+          <p className="mt-0.5 text-sm text-muted">
             {data.sourceChars < MIN_SOURCE_CHARS
               ? `Lesson text is ${data.sourceChars} characters — at least ${MIN_SOURCE_CHARS} are needed before a quiz is generated. Add content or a transcript.`
               : !row
@@ -39,9 +39,9 @@ export async function QuizPreview({ lessonId }: { lessonId: string }) {
       {row && (
         <ol className="space-y-3">
           {row.questions.map((q, i) => (
-            <li key={q.id} className="rounded-lg border border-slate-200 p-3 text-sm">
+            <li key={q.id} className="rounded-lg border border-line p-3 text-sm">
               <div className="flex items-start justify-between gap-3">
-                <p className="font-medium text-slate-900">{i + 1}. {q.question}</p>
+                <p className="font-medium text-ink">{i + 1}. {q.question}</p>
                 <form action={removeQuizQuestion}>
                   <input type="hidden" name="lessonId" value={lessonId} />
                   <input type="hidden" name="questionId" value={q.id} />
@@ -50,11 +50,11 @@ export async function QuizPreview({ lessonId }: { lessonId: string }) {
               </div>
               <ul className="mt-2 space-y-0.5">
                 {q.options.map((o, oi) => (
-                  <li key={oi} className={oi === q.correctIndex ? "font-medium text-emerald-700" : "text-slate-600"}>{oi === q.correctIndex ? "✓ " : "· "}{o}</li>
+                  <li key={oi} className={oi === q.correctIndex ? "font-medium text-emerald-700" : "text-muted"}>{oi === q.correctIndex ? "✓ " : "· "}{o}</li>
                 ))}
               </ul>
-              <p className="mt-2 text-slate-500">{q.explanation}</p>
-              <blockquote className="mt-1 border-l-2 border-slate-300 pl-3 text-xs text-slate-500 italic">“{q.sourceQuote}”</blockquote>
+              <p className="mt-2 text-muted">{q.explanation}</p>
+              <blockquote className="mt-1 border-l-2 border-line-strong pl-3 text-xs text-muted italic">“{q.sourceQuote}”</blockquote>
             </li>
           ))}
         </ol>
@@ -62,13 +62,13 @@ export async function QuizPreview({ lessonId }: { lessonId: string }) {
 
       {row && row.challenges.length > 0 && (
         <div className="mt-5">
-          <h3 className="mb-2 text-sm font-semibold text-slate-700">Practice challenges</h3>
+          <h3 className="mb-2 text-sm font-semibold text-ink-2">Practice challenges</h3>
           <ul className="space-y-2 text-sm">
             {row.challenges.map((c) => (
-              <li key={c.id} className="rounded-lg border border-slate-200 p-3">
-                <p className="font-medium text-slate-900">{c.title}</p>
-                <p className="mt-1 text-slate-600">{c.instructions}</p>
-                <ul className="mt-1 list-disc pl-5 text-slate-500">{c.checklist.map((item, i) => <li key={i}>{item}</li>)}</ul>
+              <li key={c.id} className="rounded-lg border border-line p-3">
+                <p className="font-medium text-ink">{c.title}</p>
+                <p className="mt-1 text-muted">{c.instructions}</p>
+                <ul className="mt-1 list-disc pl-5 text-muted">{c.checklist.map((item, i) => <li key={i}>{item}</li>)}</ul>
               </li>
             ))}
           </ul>

@@ -36,35 +36,35 @@ export function LessonPractice({ lessonId, availability }: { lessonId: string; a
 
   return (
     <section className="card mt-10 overflow-hidden" aria-label="Quiz and practice">
-      <div className="flex border-b border-slate-200 bg-slate-50/70">
+      <div className="flex border-b border-line bg-surface-2/70">
         {(["quiz", "practice"] as const).map((t) => (
           <button key={t} type="button" onClick={() => open(t)}
-            className={`px-5 py-3 text-sm font-medium ${tab === t ? "border-b-2 border-brand-600 bg-white text-brand-700" : "text-slate-600 hover:text-slate-900"}`}>
+            className={`px-5 py-3 text-sm font-medium ${tab === t ? "border-b-2 border-brand-600 bg-surface text-brand-700" : "text-muted hover:text-ink"}`}>
             {t === "quiz" ? "Quiz" : "Practice"}
           </button>
         ))}
-        {!tab && <span className="self-center px-3 text-xs text-slate-400">Test yourself on this lesson</span>}
+        {!tab && <span className="self-center px-3 text-xs text-faint">Test yourself on this lesson</span>}
       </div>
 
       {tab && (
         <div className="p-5">
           {availability === "too_short" || data?.status === "too_short" ? (
-            <p className="text-sm text-slate-500">Quiz not available for this lesson yet.</p>
+            <p className="text-sm text-muted">Quiz not available for this lesson yet.</p>
           ) : loading ? (
-            <p className="text-sm text-slate-500" role="status">Preparing questions for this lesson… this can take a few seconds the first time.</p>
+            <p className="text-sm text-muted" role="status">Preparing questions for this lesson… this can take a few seconds the first time.</p>
           ) : failed || !ready ? (
-            <div className="text-sm text-slate-500">
+            <div className="text-sm text-muted">
               <p>The quiz isn&apos;t available right now.</p>
               <button type="button" className="btn btn-secondary btn-sm mt-2" onClick={() => void load()}>Try again</button>
             </div>
           ) : tab === "quiz" ? (
-            ready.questions ? <Quiz lessonId={lessonId} questions={ready.questions} initialStats={ready.stats} /> : <p className="text-sm text-slate-500">Quiz not available for this lesson yet.</p>
+            ready.questions ? <Quiz lessonId={lessonId} questions={ready.questions} initialStats={ready.stats} /> : <p className="text-sm text-muted">Quiz not available for this lesson yet.</p>
           ) : ready.challenges.length ? (
             <Challenges lessonId={lessonId} challenges={ready.challenges} />
           ) : (
-            <p className="text-sm text-slate-500">No practice challenges for this lesson yet.</p>
+            <p className="text-sm text-muted">No practice challenges for this lesson yet.</p>
           )}
-          <p className="mt-6 text-xs text-slate-400">{DISCLAIMER}</p>
+          <p className="mt-6 text-xs text-faint">{DISCLAIMER}</p>
         </div>
       )}
     </section>
@@ -126,12 +126,12 @@ function Quiz({ lessonId, questions, initialStats }: { lessonId: string; questio
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-sm">
-        <p className="text-slate-600">{round.isRetry ? `Retrying ${round.questions.length} question${round.questions.length === 1 ? "" : "s"}` : `${round.questions.length} questions`}</p>
-        {stats && <p className="text-slate-500">Best score <strong className="text-slate-800">{stats.bestScore}/{stats.bestTotal}</strong> · {stats.attempts} attempt{stats.attempts === 1 ? "" : "s"}</p>}
+        <p className="text-muted">{round.isRetry ? `Retrying ${round.questions.length} question${round.questions.length === 1 ? "" : "s"}` : `${round.questions.length} questions`}</p>
+        {stats && <p className="text-muted">Best score <strong className="text-ink">{stats.bestScore}/{stats.bestTotal}</strong> · {stats.attempts} attempt{stats.attempts === 1 ? "" : "s"}</p>}
       </div>
 
       {results && (
-        <div className={`mb-5 rounded-lg px-4 py-3 text-sm ${results.score === results.total ? "bg-emerald-50 text-emerald-800" : "bg-slate-100 text-slate-700"}`} role="status">
+        <div className={`mb-5 rounded-lg px-4 py-3 text-sm ${results.score === results.total ? "bg-emerald-50 text-emerald-800" : "bg-surface-3 text-ink-2"}`} role="status">
           You scored <strong>{results.score} / {results.total}</strong>{results.score === results.total ? " — perfect!" : "."}
         </div>
       )}
@@ -140,8 +140,8 @@ function Quiz({ lessonId, questions, initialStats }: { lessonId: string; questio
         {round.questions.map((q, qi) => {
           const r = results?.byId[q.id];
           return (
-            <li key={q.id} className="rounded-lg border border-slate-200 p-4">
-              <p className="mb-3 text-sm font-medium text-slate-900">{qi + 1}. {q.question}</p>
+            <li key={q.id} className="rounded-lg border border-line p-4">
+              <p className="mb-3 text-sm font-medium text-ink">{qi + 1}. {q.question}</p>
               <div className="space-y-1.5">
                 {round.order[q.id].map((optIndex) => {
                   const chosen = answers[q.id] === optIndex;
@@ -150,7 +150,7 @@ function Quiz({ lessonId, questions, initialStats }: { lessonId: string; questio
                   return (
                     <label key={optIndex}
                       className={`flex cursor-pointer items-start gap-2.5 rounded-lg border px-3 py-2 text-sm ${
-                        isCorrect ? "border-emerald-300 bg-emerald-50" : isWrongChoice ? "border-red-300 bg-red-50" : chosen ? "border-brand-300 bg-brand-50/50" : "border-slate-200 hover:bg-slate-50"
+                        isCorrect ? "border-emerald-300 bg-emerald-50" : isWrongChoice ? "border-red-300 bg-red-50" : chosen ? "border-brand-300 bg-brand-50/50" : "border-line hover:bg-surface-2"
                       } ${r ? "cursor-default" : ""}`}>
                       <input type="radio" name={`${q.id}-${round.isRetry ? "r" : "f"}`} className="mt-0.5" checked={chosen} disabled={!!r}
                         onChange={() => setAnswers((a) => ({ ...a, [q.id]: optIndex }))} />
@@ -162,8 +162,8 @@ function Quiz({ lessonId, questions, initialStats }: { lessonId: string; questio
               {r && (
                 <div className="mt-3 text-sm">
                   <p className={r.correct ? "font-medium text-emerald-700" : "font-medium text-red-700"}>{r.correct ? "✓ Correct" : r.choice === null ? "✗ Not answered" : "✗ Incorrect"}</p>
-                  <p className="mt-1 text-slate-600">{r.explanation}</p>
-                  <blockquote className="mt-2 border-l-2 border-slate-300 pl-3 text-xs text-slate-500 italic">“{r.sourceQuote}”</blockquote>
+                  <p className="mt-1 text-muted">{r.explanation}</p>
+                  <blockquote className="mt-2 border-l-2 border-line-strong pl-3 text-xs text-muted italic">“{r.sourceQuote}”</blockquote>
                 </div>
               )}
             </li>
@@ -193,7 +193,7 @@ function Quiz({ lessonId, questions, initialStats }: { lessonId: string; questio
 function Challenges({ lessonId, challenges }: { lessonId: string; challenges: ChallengeWithResponse[] }) {
   return (
     <div className="space-y-5">
-      <p className="text-sm text-slate-600">Work through these on your own. A challenge is complete when you&apos;ve written an answer and ticked every item on its checklist. Your work saves automatically.</p>
+      <p className="text-sm text-muted">Work through these on your own. A challenge is complete when you&apos;ve written an answer and ticked every item on its checklist. Your work saves automatically.</p>
       {challenges.map((c) => <ChallengeCard key={c.id} lessonId={lessonId} challenge={c} />)}
     </div>
   );
@@ -250,17 +250,17 @@ function ChallengeCard({ lessonId, challenge }: { lessonId: string; challenge: C
   useEffect(() => () => save(), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <article className={`rounded-lg border p-4 ${completed ? "border-emerald-300 bg-emerald-50/30" : "border-slate-200"}`}>
+    <article className={`rounded-lg border p-4 ${completed ? "border-emerald-300 bg-emerald-50/30" : "border-line"}`}>
       <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
-        <h3 className="font-medium text-slate-900">{challenge.title}</h3>
+        <h3 className="font-medium text-ink">{challenge.title}</h3>
         <div className="flex items-center gap-2 text-xs">
-          <span className={status === "error" ? "text-red-600" : "text-slate-400"} aria-live="polite">
+          <span className={status === "error" ? "text-red-600" : "text-faint"} aria-live="polite">
             {status === "saving" ? "Saving…" : status === "saved" ? "Saved" : status === "error" ? error : ""}
           </span>
           {completed && <span className="badge bg-emerald-100 text-emerald-800">✓ Completed</span>}
         </div>
       </div>
-      <p className="mb-4 text-sm whitespace-pre-wrap text-slate-600">{challenge.instructions}</p>
+      <p className="mb-4 text-sm whitespace-pre-wrap text-muted">{challenge.instructions}</p>
 
       <label className="label" htmlFor={`${challenge.id}-answer`}>Your answer</label>
       <textarea id={`${challenge.id}-answer`} className="input mb-4 min-h-28 resize-y" value={answer} maxLength={10_000}
@@ -274,7 +274,7 @@ function ChallengeCard({ lessonId, challenge }: { lessonId: string; challenge: C
         <legend className="label">Self-check</legend>
         <div className="space-y-1.5">
           {challenge.checklist.map((item, i) => (
-            <label key={i} className="flex items-start gap-2 text-sm text-slate-700">
+            <label key={i} className="flex items-start gap-2 text-sm text-ink-2">
               <input type="checkbox" className="mt-0.5" checked={checked[i] ?? false}
                 onChange={(e) => {
                   const next = checked.map((v, j) => (j === i ? e.target.checked : v));

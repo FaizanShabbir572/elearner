@@ -11,8 +11,8 @@ export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: st
   return (
     <form action={action} className="space-y-4">
       <div>
-        <h1 className="text-xl font-semibold">{isLogin ? "Welcome back" : "Create your account"}</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-xl font-bold">{isLogin ? "Welcome back" : "Create your account"}</h1>
+        <p className="mt-1 text-sm text-muted">
           {isLogin ? "Log in to continue learning." : "An admin will review and approve your account."}
         </p>
       </div>
@@ -44,14 +44,14 @@ export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: st
         <label className="label" htmlFor="password">Password</label>
         <input className="input" id="password" name="password" type="password" required
           autoComplete={isLogin ? "current-password" : "new-password"} minLength={isLogin ? undefined : 8} />
-        {!isLogin && <p className="mt-1 text-xs text-slate-500">At least 8 characters.</p>}
+        {!isLogin && <p className="mt-1 text-xs text-muted">At least 8 characters.</p>}
       </div>
       <SubmitButton className="btn btn-primary w-full py-2.5" pendingText={isLogin ? "Logging in…" : "Creating account…"}>
         {isLogin ? "Log in" : "Create account"}
       </SubmitButton>
-      <p className="text-center text-sm text-slate-500">
+      <p className="text-center text-sm text-muted">
         {isLogin ? "New here? " : "Already registered? "}
-        <Link className="font-medium text-brand-600 hover:underline" href={isLogin ? "/register" : "/login"}>
+        <Link className="font-medium text-brand-400 hover:underline" href={isLogin ? "/register" : "/login"}>
           {isLogin ? "Create an account" : "Log in"}
         </Link>
       </p>

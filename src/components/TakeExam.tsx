@@ -60,14 +60,14 @@ export function TakeExam({ assignmentId, questions, initialAnswers }: { assignme
 
   return (
     <div>
-      <div className="sticky top-0 z-10 -mx-5 mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50/95 px-5 py-3 backdrop-blur md:-mx-10 md:px-10">
+      <div className="sticky top-0 z-10 -mx-5 mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-line bg-surface-2/95 px-5 py-3 backdrop-blur md:-mx-10 md:px-10">
         <div className="min-w-48 flex-1">
-          <p className="text-sm font-medium text-slate-700">{answered} of {questions.length} answered</p>
-          <div className="mt-1 h-1.5 w-full max-w-sm overflow-hidden rounded-full bg-slate-200">
+          <p className="text-sm font-medium text-ink-2">{answered} of {questions.length} answered</p>
+          <div className="mt-1 h-1.5 w-full max-w-sm overflow-hidden rounded-full bg-line">
             <div className="h-full bg-brand-600 transition-all" style={{ width: `${(answered / questions.length) * 100}%` }} />
           </div>
         </div>
-        <span className={`text-xs ${status === "error" ? "text-red-600" : "text-slate-500"}`} aria-live="polite">
+        <span className={`text-xs ${status === "error" ? "text-red-600" : "text-muted"}`} aria-live="polite">
           {status === "saving" ? "Saving…" : status === "saved" ? "Progress saved" : status === "error" ? error : ""}
         </span>
       </div>
@@ -75,12 +75,12 @@ export function TakeExam({ assignmentId, questions, initialAnswers }: { assignme
       <ol className="space-y-4">
         {questions.map((q, qi) => (
           <li key={q.id} id={`q-${qi + 1}`} className="card p-5">
-            <p className="mb-3 text-sm font-medium whitespace-pre-wrap text-slate-900">{qi + 1}. {q.text}</p>
+            <p className="mb-3 text-sm font-medium whitespace-pre-wrap text-ink">{qi + 1}. {q.text}</p>
             <div className="space-y-1.5">
               {q.options.map((o, oi) => (
-                <label key={oi} className={`flex cursor-pointer items-start gap-2.5 rounded-lg border px-3 py-2 text-sm ${answers[q.id] === oi ? "border-brand-400 bg-brand-50/60" : "border-slate-200 hover:bg-slate-50"}`}>
+                <label key={oi} className={`flex cursor-pointer items-start gap-2.5 rounded-lg border px-3 py-2 text-sm ${answers[q.id] === oi ? "border-brand-400 bg-brand-50/60" : "border-line hover:bg-surface-2"}`}>
                   <input type="radio" name={q.id} className="mt-0.5" checked={answers[q.id] === oi} onChange={() => choose(q.id, oi)} />
-                  <span><span className="mr-1 font-medium text-slate-500">{LETTERS[oi]})</span>{o}</span>
+                  <span><span className="mr-1 font-medium text-muted">{LETTERS[oi]})</span>{o}</span>
                 </label>
               ))}
             </div>
@@ -91,7 +91,7 @@ export function TakeExam({ assignmentId, questions, initialAnswers }: { assignme
       {error && status !== "error" && <p className="mt-4 text-sm text-red-700" role="alert">{error}</p>}
       <div className="mt-6 flex items-center gap-3">
         <button type="button" className="btn btn-primary" disabled={submitting} onClick={submit}>{submitting ? "Submitting…" : "Submit quiz"}</button>
-        <span className="text-sm text-slate-500">An admin will review your answers and mark the quiz pass or fail.</span>
+        <span className="text-sm text-muted">An admin will review your answers and mark the quiz pass or fail.</span>
       </div>
     </div>
   );

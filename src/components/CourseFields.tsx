@@ -16,7 +16,7 @@ export function CourseFields({ course }: { course?: { title: string; description
         <select className="input" id="proficiencyLevel" name="proficiencyLevel" defaultValue={course?.proficiencyLevel ?? "BEGINNER"}>
           {LEVELS.map((l) => <option key={l} value={l}>{LEVEL_LABEL[l]}</option>)}
         </select>
-        <p className="mt-1 text-xs text-slate-500">Only students assigned to this level will see the course.</p>
+        <p className="mt-1 text-xs text-muted">Only students assigned to this level will see the course.</p>
       </div>
     </>
   );

@@ -8,7 +8,7 @@ type CertData = {
   certificateNumber: string;
 };
 
-const INDIGO = rgb(0.263, 0.22, 0.792);
+const BLUE = rgb(0, 0.42, 1); // TWR electric blue (#006BFF)
 const GOLD = rgb(0.78, 0.6, 0.18);
 const INK = rgb(0.12, 0.13, 0.16);
 const MUTED = rgb(0.42, 0.45, 0.5);
@@ -37,10 +37,10 @@ export async function renderCertificatePdf(data: CertData): Promise<Uint8Array> 
   const sansBold = await pdf.embedFont(StandardFonts.HelveticaBold);
 
   page.drawRectangle({ x: 0, y: 0, width, height, color: rgb(0.99, 0.98, 0.96) });
-  page.drawRectangle({ x: 24, y: 24, width: width - 48, height: height - 48, borderColor: INDIGO, borderWidth: 4 });
+  page.drawRectangle({ x: 24, y: 24, width: width - 48, height: height - 48, borderColor: BLUE, borderWidth: 4 });
   page.drawRectangle({ x: 36, y: 36, width: width - 72, height: height - 72, borderColor: GOLD, borderWidth: 1.2 });
 
-  centered(page, "CERTIFICATE OF COMPLETION", height - 120, sansBold, 30, INDIGO);
+  centered(page, "CERTIFICATE OF COMPLETION", height - 120, sansBold, 30, BLUE);
   page.drawLine({ start: { x: width / 2 - 90, y: height - 138 }, end: { x: width / 2 + 90, y: height - 138 }, thickness: 1.5, color: GOLD });
 
   centered(page, "This is to certify that", height - 190, serifItalic, 18, MUTED);
@@ -48,7 +48,7 @@ export async function renderCertificatePdf(data: CertData): Promise<Uint8Array> 
   page.drawLine({ start: { x: width / 2 - 220, y: height - 264 }, end: { x: width / 2 + 220, y: height - 264 }, thickness: 0.8, color: MUTED });
 
   centered(page, "has successfully completed the course", height - 305, serifItalic, 18, MUTED);
-  centered(page, safe(data.courseTitle), height - 350, serifBold, 28, INDIGO);
+  centered(page, safe(data.courseTitle), height - 350, serifBold, 28, BLUE);
 
   const date = data.issuedAt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
   const colY = 120;

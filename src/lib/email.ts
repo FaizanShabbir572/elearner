@@ -54,7 +54,7 @@ const esc = (s: string) =>
 
 function layout(title: string, body: string, cta?: { href: string; label: string }) {
   const button = cta
-    ? `<p style="margin:28px 0"><a href="${cta.href}" style="background:#4338ca;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">${esc(cta.label)}</a></p>`
+    ? `<p style="margin:28px 0"><a href="${cta.href}" style="background:#006bff;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">${esc(cta.label)}</a></p>`
     : "";
   return `<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1f2937">
 <h2 style="color:#111827;margin:0 0 16px">${esc(title)}</h2>${body}${button}

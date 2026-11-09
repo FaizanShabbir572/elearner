@@ -264,7 +264,7 @@ export function LessonVideoPlayer({ embedUrl, title, startAt }: { embedUrl: stri
   }, [ctx, provider, src]);
 
   return (
-    <div ref={ctx?._container} className="mb-8 aspect-video scroll-mt-6 overflow-hidden rounded-xl bg-slate-900 shadow-sm">
+    <div ref={ctx?._container} className="mb-8 aspect-video scroll-mt-6 overflow-hidden rounded-xl bg-black shadow-sm">
       {/* key: a new start time means a fresh element (and a fresh API connection). */}
       {provider === "file" ? (
         <video key={src} ref={videoRef} src={src} className="h-full w-full" title={title} controls playsInline preload="metadata"

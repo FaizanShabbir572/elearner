@@ -67,7 +67,7 @@ export function NotesPanel({ courseId, lessonId, hasVideo, initialNotes, initial
   return (
     <section className="card mb-8 p-5" aria-label="My notes">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h3 className="font-semibold">My notes {notes.length > 0 && <span className="text-sm font-normal text-slate-500">({notes.length})</span>}</h3>
+        <h3 className="font-semibold">My notes {notes.length > 0 && <span className="text-sm font-normal text-muted">({notes.length})</span>}</h3>
         {!draft && (
           <button type="button" className="btn btn-primary btn-sm" onClick={addNote}>
             + Add note{hasVideo && player.ready ? " at current time" : ""}
@@ -85,11 +85,11 @@ export function NotesPanel({ courseId, lessonId, hasVideo, initialNotes, initial
       )}
 
       {notes.length === 0 && !draft ? (
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-muted">
           {hasVideo ? "Pause anywhere and add a note — it's stamped with the video time so you can jump back later." : "Jot down key points from this lesson."}
         </p>
       ) : (
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-line/70">
           {notes.filter((n) => n.id !== draft?.createdId).map((n) => (
             <li key={n.id} className="py-3 first:pt-0 last:pb-0">
               {draft?.noteId === n.id ? (
@@ -103,10 +103,10 @@ export function NotesPanel({ courseId, lessonId, hasVideo, initialNotes, initial
                       ▶ {formatTimestamp(n.timestampSec)}
                     </button>
                   ) : (
-                    <span className="badge h-fit shrink-0 bg-slate-100 text-slate-500">Note</span>
+                    <span className="badge h-fit shrink-0 bg-surface-3 text-muted">Note</span>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm break-words whitespace-pre-wrap text-slate-700">{n.content}</p>
+                    <p className="text-sm break-words whitespace-pre-wrap text-ink-2">{n.content}</p>
                     <NoteActionsRow note={n} actions={actions.filter((a) => a.noteId === n.id)} aiEnabled={aiEnabled}
                       onCreated={(a) => setActions((list) => [...list, a])} />
                   </div>
@@ -185,10 +185,10 @@ function NoteEditor({ lessonId, noteId, timestampSec, initialContent, onSaved, o
   return (
     <div className="mb-4 rounded-lg border border-brand-200 bg-brand-50/40 p-3">
       <div className="mb-2 flex items-center justify-between text-xs">
-        <span className="font-medium text-slate-600">
+        <span className="font-medium text-muted">
           {timestampSec !== null ? <>At <span className="font-mono">{formatTimestamp(timestampSec)}</span></> : "No timestamp"}
         </span>
-        <span className={status === "error" ? "text-red-600" : "text-slate-500"} aria-live="polite">
+        <span className={status === "error" ? "text-red-600" : "text-muted"} aria-live="polite">
           {status === "pending" || status === "saving" ? "Saving…" : status === "saved" ? "Saved" : status === "error" ? error : ""}
         </span>
       </div>
@@ -208,7 +208,7 @@ function NoteEditor({ lessonId, noteId, timestampSec, initialContent, onSaved, o
         onBlur={() => void save()}
       />
       <div className="mt-2 flex items-center justify-between">
-        <span className="text-xs text-slate-400">{text.length.toLocaleString()} / {NOTE_MAX_LENGTH.toLocaleString()}</span>
+        <span className="text-xs text-faint">{text.length.toLocaleString()} / {NOTE_MAX_LENGTH.toLocaleString()}</span>
         <button type="button" className="btn btn-secondary btn-sm" onClick={done}>Done</button>
       </div>
     </div>

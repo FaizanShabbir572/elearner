@@ -1,11 +1,14 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AppLoader } from "@/components/AppLoader";
 
 export const metadata: Metadata = {
-  title: { default: "LearnHub", template: "%s · LearnHub" },
-  description: "Courses, progress tracking and certificates.",
+  title: { default: "Trade With Ray", template: "%s · Trade With Ray" },
+  description: "Trade With Ray — structured trading courses, progress tracking and certificates.",
+  applicationName: "Trade With Ray",
 };
+
+export const viewport: Viewport = { themeColor: "#020813", colorScheme: "dark" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

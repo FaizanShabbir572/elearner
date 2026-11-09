@@ -40,8 +40,8 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
     <>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <Link href="/admin/exams" className="text-sm text-slate-500 hover:text-slate-800">← All quizzes</Link>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">{exam.title}</h1>
+          <Link href="/admin/exams" className="text-sm text-muted hover:text-ink">← All quizzes</Link>
+          <h1 className="mt-1 heading-accent text-2xl font-bold tracking-tight">{exam.title}</h1>
         </div>
         <form action={deleteExam}>
           <input type="hidden" name="id" value={exam.id} />
@@ -61,23 +61,23 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
           <section>
             <h2 className="mb-3 font-semibold">Assigned students {awaiting > 0 && <span className="badge ml-1 bg-amber-50 text-amber-800">{awaiting} to review</span>}</h2>
             {exam.assignments.length === 0 ? (
-              <p className="card px-5 py-6 text-sm text-slate-500">Not assigned to anyone yet.</p>
+              <p className="card px-5 py-6 text-sm text-muted">Not assigned to anyone yet.</p>
             ) : (
               <div className="card overflow-x-auto">
                 <table className="w-full min-w-[640px] text-left text-sm">
-                  <thead className="border-b border-slate-200 bg-slate-50/70 text-xs font-medium tracking-wide text-slate-500 uppercase">
+                  <thead className="border-b border-line bg-surface-2/70 text-xs font-medium tracking-wide text-muted uppercase">
                     <tr><th className="px-4 py-2.5">Student</th><th className="px-4 py-2.5">Status</th><th className="px-4 py-2.5">Score</th><th className="px-4 py-2.5">Submitted</th><th className="px-4 py-2.5 text-right">Actions</th></tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-line/70">
                     {exam.assignments.map((a) => {
                       const s = a.score !== null && a.total ? suggestedResult(a.score, a.total, exam.passMark) : null;
                       return (
                         <tr key={a.id} className={a.status === "SUBMITTED" ? "bg-amber-50/30" : ""}>
-                          <td className="px-4 py-3"><p className="font-medium text-slate-900">{a.user.name}</p><p className="text-xs text-slate-500">{a.user.email}</p></td>
+                          <td className="px-4 py-3"><p className="font-medium text-ink">{a.user.name}</p><p className="text-xs text-muted">{a.user.email}</p></td>
                           <td className="px-4 py-3"><span className={`badge ${EXAM_STATUS_STYLE[a.status]}`}>{EXAM_STATUS_LABEL[a.status]}</span>
-                            {a.dueDate && a.status === "ASSIGNED" && <p className="mt-1 text-xs text-slate-500">Due {formatDue(a.dueDate)}</p>}</td>
+                            {a.dueDate && a.status === "ASSIGNED" && <p className="mt-1 text-xs text-muted">Due {formatDue(a.dueDate)}</p>}</td>
                           <td className="px-4 py-3 whitespace-nowrap">{s ? `${a.score}/${a.total} (${s.percent}%)` : "—"}</td>
-                          <td className="px-4 py-3 whitespace-nowrap text-slate-500">{a.submittedAt ? formatDateTime(a.submittedAt) : "—"}</td>
+                          <td className="px-4 py-3 whitespace-nowrap text-muted">{a.submittedAt ? formatDateTime(a.submittedAt) : "—"}</td>
                           <td className="px-4 py-3">
                             <div className="flex justify-end gap-1.5">
                               {a.status !== "ASSIGNED" && <Link href={`/admin/exams/${exam.id}/review/${a.id}`} className="btn btn-primary btn-sm">{a.status === "SUBMITTED" ? "Review" : "View"}</Link>}
@@ -110,7 +110,7 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
                     </form>
                   } />
               ))}
-              {qCount === 0 && <p className="card px-5 py-6 text-sm text-slate-500">No questions yet. Add them one by one, or paste many at once with “Bulk import”.</p>}
+              {qCount === 0 && <p className="card px-5 py-6 text-sm text-muted">No questions yet. Add them one by one, or paste many at once with “Bulk import”.</p>}
             </div>
             {!locked && qCount < EXAM_MAX_QUESTIONS && (
               <div className="mt-4 grid gap-4 xl:grid-cols-2">

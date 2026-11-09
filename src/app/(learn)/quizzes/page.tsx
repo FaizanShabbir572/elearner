@@ -33,15 +33,15 @@ export default async function MyQuizzesPage() {
               <Link key={a.id} href={`/quizzes/${a.id}`} className="card group flex flex-wrap items-center justify-between gap-4 p-5 transition hover:border-brand-500/40 hover:shadow-md">
                 <div className="min-w-0">
                   <h2 className="font-semibold group-hover:text-brand-700">{a.exam.title}</h2>
-                  {a.exam.description && <p className="mt-1 line-clamp-2 text-sm text-slate-500">{a.exam.description}</p>}
-                  <p className="mt-2 text-xs text-slate-500">
+                  {a.exam.description && <p className="mt-1 line-clamp-2 text-sm text-muted">{a.exam.description}</p>}
+                  <p className="mt-2 text-xs text-muted">
                     {a.exam._count.questions} questions
                     {a.submittedAt && ` · submitted ${formatDateTime(a.submittedAt)}`}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   {a.dueDate && a.status === "ASSIGNED" && (
-                    <span className={`badge ${due === "overdue" ? "bg-red-50 text-red-700" : due === "soon" ? "bg-amber-50 text-amber-800" : "bg-slate-100 text-slate-600"}`}>{dueLabel(a.dueDate, today)}</span>
+                    <span className={`badge ${due === "overdue" ? "bg-red-50 text-red-700" : due === "soon" ? "bg-amber-50 text-amber-800" : "bg-surface-3 text-muted"}`}>{dueLabel(a.dueDate, today)}</span>
                   )}
                   <span className={`badge ${EXAM_STATUS_STYLE[a.status]}`}>{a.status === "ASSIGNED" ? "To do" : EXAM_STATUS_LABEL[a.status]}</span>
                 </div>

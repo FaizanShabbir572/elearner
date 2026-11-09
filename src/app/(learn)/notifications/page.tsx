@@ -25,15 +25,15 @@ export default async function NotificationsPage() {
       {notifications.length === 0 ? (
         <EmptyState title="No notifications yet">Reminders from your instructor will appear here.</EmptyState>
       ) : (
-        <ul className="card divide-y divide-slate-100">
+        <ul className="card divide-y divide-line/70">
           {notifications.map((n) => (
             <li key={n.id} className={`px-5 py-4 ${n.readAt ? "" : "bg-brand-50/50"}`}>
               <div className="flex items-start gap-2.5">
                 {!n.readAt && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-600" title="Unread" aria-label="Unread" />}
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium text-slate-900">{n.title}</p>
-                  <p className="mt-1 text-sm whitespace-pre-wrap text-slate-600">{n.message}</p>
-                  <p className="mt-1.5 text-xs text-slate-500">{formatDateTime(n.createdAt)}</p>
+                  <p className="font-medium text-ink">{n.title}</p>
+                  <p className="mt-1 text-sm whitespace-pre-wrap text-muted">{n.message}</p>
+                  <p className="mt-1.5 text-xs text-muted">{formatDateTime(n.createdAt)}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {n.courseId && (
                       <form action={openNotification}>

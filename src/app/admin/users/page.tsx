@@ -52,9 +52,9 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
       <div className="mb-5 flex flex-wrap gap-1.5">
         {tabs.map((t) => (
           <Link key={t.label} href={t.key ? `/admin/users?status=${t.key}` : "/admin/users"}
-            className={`btn btn-sm ${filter === t.key ? "bg-slate-900 text-white" : "btn-secondary"}`}>
+            className={`btn btn-sm ${filter === t.key ? "btn-active" : "btn-secondary"}`}>
             {t.label}
-            <span className={`rounded-full px-1.5 text-[11px] ${filter === t.key ? "bg-white/20" : t.key === "PENDING" && countOf(t.key) > 0 ? "bg-amber-100 text-amber-800" : "bg-slate-100"}`}>{countOf(t.key)}</span>
+            <span className={`rounded-full px-1.5 text-[11px] ${filter === t.key ? "bg-white/20" : t.key === "PENDING" && countOf(t.key) > 0 ? "bg-amber-100 text-amber-800" : "bg-surface-3"}`}>{countOf(t.key)}</span>
           </Link>
         ))}
       </div>
@@ -64,7 +64,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full min-w-[1180px] text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50/70 text-xs font-medium tracking-wide text-slate-500 uppercase">
+            <thead className="border-b border-line bg-surface-2/70 text-xs font-medium tracking-wide text-muted uppercase">
               <tr>
                 <th className="px-5 py-3">Student</th>
                 <th className="px-5 py-3">Status</th>
@@ -75,7 +75,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
                 <th className="px-5 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-line/70">
               {users.map((u) => {
                 const act = activity.get(u.id);
                 const cov = coverage.get(u.id);
@@ -84,27 +84,27 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
                 return (
                 <tr key={u.id} className={u.status === "PENDING" ? "bg-amber-50/30" : ""}>
                   <td className="px-5 py-3.5">
-                    <Link href={`/admin/users/${u.id}`} className="font-medium text-slate-900 hover:text-brand-600 hover:underline">{u.name}</Link>
-                    <p className="text-xs text-slate-500">{u.email}{u._count.certificates > 0 && ` · ${u._count.certificates} certificate${u._count.certificates > 1 ? "s" : ""}`}</p>
+                    <Link href={`/admin/users/${u.id}`} className="font-medium text-ink hover:text-brand-600 hover:underline">{u.name}</Link>
+                    <p className="text-xs text-muted">{u.email}{u._count.certificates > 0 && ` · ${u._count.certificates} certificate${u._count.certificates > 1 ? "s" : ""}`}</p>
                   </td>
                   <td className="px-5 py-3.5"><StatusBadge status={u.status} /></td>
                   <td className="px-5 py-3.5"><LevelBadge level={u.proficiencyLevel} /></td>
                   <td className="px-5 py-3.5">
                     {!cov ? (
-                      <span className="text-xs text-slate-400">—</span>
+                      <span className="text-xs text-faint">—</span>
                     ) : cov.total === 0 ? (
-                      <span className="text-xs text-slate-500">No courses on this track</span>
+                      <span className="text-xs text-muted">No courses on this track</span>
                     ) : (
                       <>
-                        <div className="mb-1 flex justify-between gap-3 text-xs text-slate-500">
+                        <div className="mb-1 flex justify-between gap-3 text-xs text-muted">
                           <span className="whitespace-nowrap">{cov.done} of {cov.total} lessons</span>
-                          <span className="font-medium text-slate-700">{cov.percent}%</span>
+                          <span className="font-medium text-ink-2">{cov.percent}%</span>
                         </div>
                         <ProgressBar percent={cov.percent} />
                         {nextCourse ? (
                           <div className="mt-2 space-y-1">
                             <RemindButton userId={u.id} studentName={u.name} course={{ id: nextCourse.id, title: nextCourse.title }} emailReady={emailConfigured()} />
-                            {reminded && <p className="text-xs text-slate-500">Last reminded {formatDate(reminded)}</p>}
+                            {reminded && <p className="text-xs text-muted">Last reminded {formatDate(reminded)}</p>}
                           </div>
                         ) : (
                           <p className="mt-1.5 text-xs text-emerald-700">All courses finished</p>
@@ -112,18 +112,18 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
                       </>
                     )}
                   </td>
-                  <td className="px-5 py-3.5 whitespace-nowrap text-slate-500">{u.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
+                  <td className="px-5 py-3.5 whitespace-nowrap text-muted">{u.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
                   <td className="px-5 py-3.5 whitespace-nowrap">
                     {act?.lastLogin ? (
                       <>
-                        <p className="flex items-center gap-1.5 text-slate-700">
+                        <p className="flex items-center gap-1.5 text-ink-2">
                           {act.online && <span className="h-2 w-2 rounded-full bg-emerald-500" title="Online" aria-label="Online" />}
                           {formatDateTime(act.lastLogin)}
                         </p>
-                        <p className="text-xs text-slate-500">{formatDuration(act.totalMs)} total{act.online && " · Online"}</p>
+                        <p className="text-xs text-muted">{formatDuration(act.totalMs)} total{act.online && " · Online"}</p>
                       </>
                     ) : (
-                      <span className="text-xs text-slate-400">Never</span>
+                      <span className="text-xs text-faint">Never</span>
                     )}
                   </td>
                   <td className="px-5 py-3.5">

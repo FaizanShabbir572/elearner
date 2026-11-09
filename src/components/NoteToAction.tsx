@@ -6,7 +6,7 @@ import { ACTION_STATUS_LABEL } from "@/lib/constants";
 import { ActionFieldsForm } from "./ActionCard";
 
 const CHIP_STYLE: Record<string, string> = {
-  TODO: "bg-slate-100 text-slate-700",
+  TODO: "bg-surface-3 text-ink-2",
   IN_PROGRESS: "bg-sky-50 text-sky-700",
   DONE: "bg-emerald-50 text-emerald-700",
 };
@@ -37,20 +37,20 @@ export function NoteActionsRow({ note, actions, aiEnabled, onCreated }: {
       <div className="flex flex-wrap items-center gap-1.5">
         {actions.map((a) => (
           <Link key={a.id} href={`/actions?highlight=${a.id}`} title={a.title}
-            className={`badge max-w-60 gap-1 hover:ring-1 hover:ring-slate-300 ${CHIP_STYLE[a.status] ?? CHIP_STYLE.TODO}`}>
+            className={`badge max-w-60 gap-1 hover:ring-1 hover:ring-line-strong ${CHIP_STYLE[a.status] ?? CHIP_STYLE.TODO}`}>
             <span className="truncate">{a.title}</span>
             <span className="shrink-0 opacity-70">· {ACTION_STATUS_LABEL[a.status] ?? a.status}</span>
           </Link>
         ))}
         {!open && (
-          <button type="button" className="badge border border-dashed border-slate-300 text-slate-600 hover:border-brand-400 hover:text-brand-700"
+          <button type="button" className="badge border border-dashed border-line-strong text-muted hover:border-brand-400 hover:text-brand-700"
             onClick={() => setOpen(true)}>
             + Create action
           </button>
         )}
       </div>
       {open && (
-        <div className="mt-2 rounded-lg border border-slate-200 bg-white p-3">
+        <div className="mt-2 rounded-lg border border-line bg-surface p-3">
           {aiEnabled && <AiSuggestions noteId={note.id} onAccepted={onCreated} />}
           <ActionFieldsForm
             initial={{ title: titleFromNote(note.content), description: note.content }}
@@ -110,18 +110,18 @@ function AiSuggestions({ noteId, onAccepted }: { noteId: string; onAccepted: (a:
   }
 
   return (
-    <div className="mb-4 border-b border-slate-100 pb-4">
+    <div className="mb-4 border-b border-line/70 pb-4">
       <div className="flex flex-wrap items-center gap-2">
         <button type="button" className="btn btn-secondary btn-sm" onClick={suggest} disabled={status === "loading"}>
           {status === "loading" ? "Thinking…" : items.length ? "✨ Suggest again" : "✨ Suggest with AI"}
         </button>
-        <span className="text-xs text-slate-400">Practice ideas based on your note and this lesson. Not financial advice.</span>
+        <span className="text-xs text-faint">Practice ideas based on your note and this lesson. Not financial advice.</span>
       </div>
       {message && <p className={`mt-2 text-sm ${status === "error" ? "text-amber-800" : "text-red-700"}`} role="status">{message}</p>}
       {items.length > 0 && (
         <ul className="mt-3 space-y-2">
           {items.map((s) => (
-            <li key={s.key} className="rounded-lg border border-violet-200 bg-violet-50/40 p-3">
+            <li key={s.key} className="rounded-lg border border-cyan/30 bg-cyan/5 p-3">
               {s.state === "editing" ? (
                 <ActionFieldsForm
                   initial={{ title: s.title, description: s.description }}
@@ -132,8 +132,8 @@ function AiSuggestions({ noteId, onAccepted }: { noteId: string; onAccepted: (a:
                 />
               ) : (
                 <>
-                  <p className="text-sm font-medium text-slate-900">{s.title}</p>
-                  {s.description && <p className="mt-0.5 text-sm text-slate-600">{s.description}</p>}
+                  <p className="text-sm font-medium text-ink">{s.title}</p>
+                  {s.description && <p className="mt-0.5 text-sm text-muted">{s.description}</p>}
                   <div className="mt-2 flex gap-1.5">
                     <button type="button" className="btn btn-primary btn-sm" disabled={s.state === "saving"} onClick={() => accept(s)}>
                       {s.state === "saving" ? "Saving…" : "Accept"}

@@ -20,8 +20,8 @@ function MoveButtons({ id, action, first, last, label }: { id: string; action: (
   return (
     <form action={action} className="flex flex-col">
       <input type="hidden" name="id" value={id} />
-      <button name="dir" value="up" disabled={first} aria-label={`Move ${label} up`} className="rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:invisible"><Arrow up /></button>
-      <button name="dir" value="down" disabled={last} aria-label={`Move ${label} down`} className="rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:invisible"><Arrow /></button>
+      <button name="dir" value="up" disabled={first} aria-label={`Move ${label} up`} className="rounded p-0.5 text-faint hover:bg-surface-3 hover:text-ink-2 disabled:invisible"><Arrow up /></button>
+      <button name="dir" value="down" disabled={last} aria-label={`Move ${label} down`} className="rounded p-0.5 text-faint hover:bg-surface-3 hover:text-ink-2 disabled:invisible"><Arrow /></button>
     </form>
   );
 }
@@ -45,8 +45,8 @@ export default async function EditCoursePage({ params, searchParams }: { params:
     <>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Link href="/admin/courses" className="text-sm text-slate-500 hover:text-slate-800">← All courses</Link>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">{course.title}</h1>
+          <Link href="/admin/courses" className="text-sm text-muted hover:text-ink">← All courses</Link>
+          <h1 className="mt-1 heading-accent text-2xl font-bold tracking-tight">{course.title}</h1>
         </div>
         <Link href={`/courses/${course.id}`} className="btn btn-secondary">Preview as student</Link>
       </div>
@@ -57,20 +57,20 @@ export default async function EditCoursePage({ params, searchParams }: { params:
         <section className="space-y-4">
           <div className="flex items-baseline justify-between">
             <h2 className="font-semibold">Curriculum</h2>
-            <span className="text-sm text-slate-500">{course.modules.length} modules · {lessonCount} lessons</span>
+            <span className="text-sm text-muted">{course.modules.length} modules · {lessonCount} lessons</span>
           </div>
 
           {course.modules.length === 0 && <EmptyState title="No modules yet">Add a module below, then add lessons inside it.</EmptyState>}
 
           {course.modules.map((m, mi) => (
             <div key={m.id} className="card overflow-hidden">
-              <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50/70 px-3 py-2.5">
+              <div className="flex items-center gap-2 border-b border-line bg-surface-2/70 px-3 py-2.5">
                 <MoveButtons id={m.id} action={moveModule} first={mi === 0} last={mi === course.modules.length - 1} label={m.title} />
-                <span className="text-xs font-semibold text-slate-400">M{mi + 1}</span>
+                <span className="text-xs font-semibold text-faint">M{mi + 1}</span>
                 <form action={renameModule} className="flex min-w-0 flex-1 items-center gap-2">
                   <input type="hidden" name="id" value={m.id} />
                   <input name="title" defaultValue={m.title} aria-label="Module title" required
-                    className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-2 py-1 font-medium text-slate-900 hover:border-slate-300 focus:border-brand-500 focus:bg-white focus:outline-none" />
+                    className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-2 py-1 font-medium text-ink hover:border-line-strong focus:border-brand-500 focus:bg-surface focus:outline-none" />
                   <SubmitButton className="btn btn-ghost btn-sm">Rename</SubmitButton>
                 </form>
                 <form action={deleteModule}>
@@ -79,14 +79,14 @@ export default async function EditCoursePage({ params, searchParams }: { params:
                 </form>
               </div>
 
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-line/70">
                 {m.lessons.map((l, li) => (
                   <li key={l.id} className={`flex items-center gap-2 px-3 py-2 ${saved === l.id ? "bg-emerald-50/60" : ""}`}>
                     <MoveButtons id={l.id} action={moveLesson} first={li === 0} last={li === m.lessons.length - 1} label={l.title} />
-                    <Link href={`/admin/courses/${course.id}/lessons/${l.id}`} className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1 hover:bg-slate-50">
-                      <span className="w-7 text-xs text-slate-400">{mi + 1}.{li + 1}</span>
-                      <span className="truncate text-sm text-slate-800">{l.title}</span>
-                      {l.videoUrl && <span className="badge bg-slate-100 text-slate-500">Video</span>}
+                    <Link href={`/admin/courses/${course.id}/lessons/${l.id}`} className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1 hover:bg-surface-2">
+                      <span className="w-7 text-xs text-faint">{mi + 1}.{li + 1}</span>
+                      <span className="truncate text-sm text-ink">{l.title}</span>
+                      {l.videoUrl && <span className="badge bg-surface-3 text-muted">Video</span>}
                     </Link>
                     <Link href={`/admin/courses/${course.id}/lessons/${l.id}`} className="btn btn-ghost btn-sm">Edit</Link>
                   </li>
@@ -115,18 +115,18 @@ export default async function EditCoursePage({ params, searchParams }: { params:
             <h2 className="font-semibold">Course details</h2>
             <input type="hidden" name="id" value={course.id} />
             <CourseFields course={course} />
-            <label className="flex items-start gap-3 rounded-lg border border-slate-200 p-3">
+            <label className="flex items-start gap-3 rounded-lg border border-line p-3">
               <input type="checkbox" name="published" defaultChecked={course.published} className="mt-0.5 h-4 w-4 accent-brand-600" />
               <span>
-                <span className="block text-sm font-medium text-slate-800">Published</span>
-                <span className="block text-xs text-slate-500">Visible to approved students at this level.</span>
+                <span className="block text-sm font-medium text-ink">Published</span>
+                <span className="block text-xs text-muted">Visible to approved students at this level.</span>
               </span>
             </label>
             <SubmitButton className="btn btn-primary w-full" pendingText="Saving…">Save details</SubmitButton>
           </form>
           <form action={deleteCourse} className="card flex items-center justify-between gap-3 p-4">
             <input type="hidden" name="id" value={course.id} />
-            <p className="text-xs text-slate-500">Deleting removes all modules, lessons, progress and certificates.</p>
+            <p className="text-xs text-muted">Deleting removes all modules, lessons, progress and certificates.</p>
             <ConfirmButton message={`Delete "${course.title}" permanently?`}>Delete course</ConfirmButton>
           </form>
         </aside>

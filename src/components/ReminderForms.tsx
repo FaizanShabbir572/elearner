@@ -43,13 +43,13 @@ export function ReminderComposer({ userId, courses, emailReady }: { userId: stri
         </select>
       </div>
       <div>
-        <label className="label" htmlFor="reminder-message">Message <span className="font-normal text-slate-500">(optional)</span></label>
+        <label className="label" htmlFor="reminder-message">Message <span className="font-normal text-muted">(optional)</span></label>
         <textarea id="reminder-message" name="message" rows={3} maxLength={1000} className="input"
           placeholder="Leave blank to send the standard reminder with their current progress." />
       </div>
       {emailReady && (
-        <label className="flex items-center gap-2 text-sm text-slate-700">
-          <input type="checkbox" name="email" defaultChecked className="rounded border-slate-300" />
+        <label className="flex items-center gap-2 text-sm text-ink-2">
+          <input type="checkbox" name="email" defaultChecked className="rounded border-line-strong" />
           Also send by email
         </label>
       )}

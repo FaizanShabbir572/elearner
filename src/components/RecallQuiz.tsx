@@ -32,7 +32,7 @@ export function RecallQuiz({ items }: { items: RecallItem[] }) {
   return (
     <div>
       {results && (
-        <p className="mb-4 rounded-lg bg-slate-100 px-4 py-3 text-sm text-slate-700" role="status">
+        <p className="mb-4 rounded-lg bg-surface-3 px-4 py-3 text-sm text-ink-2" role="status">
           You got <strong>{score} / {Object.keys(results).length}</strong>. Questions you answered correctly will rest for a few days; reload later for a fresh round.
         </p>
       )}
@@ -41,9 +41,9 @@ export function RecallQuiz({ items }: { items: RecallItem[] }) {
           const k = keyOf(item);
           const r = results?.[k];
           return (
-            <li key={k} className="rounded-lg border border-slate-200 p-4">
-              <p className="mb-1 text-xs text-slate-400">From: {item.lessonTitle}</p>
-              <p className="mb-3 text-sm font-medium text-slate-900">{idx + 1}. {item.question.question}</p>
+            <li key={k} className="rounded-lg border border-line p-4">
+              <p className="mb-1 text-xs text-faint">From: {item.lessonTitle}</p>
+              <p className="mb-3 text-sm font-medium text-ink">{idx + 1}. {item.question.question}</p>
               <div className="space-y-1.5">
                 {item.question.options.map((opt, oi) => {
                   const chosen = answers[k] === oi;
@@ -51,7 +51,7 @@ export function RecallQuiz({ items }: { items: RecallItem[] }) {
                   const isWrong = r && chosen && !r.correct;
                   return (
                     <label key={oi} className={`flex items-start gap-2.5 rounded-lg border px-3 py-2 text-sm ${
-                      isCorrect ? "border-emerald-300 bg-emerald-50" : isWrong ? "border-red-300 bg-red-50" : chosen ? "border-brand-300 bg-brand-50/50" : "border-slate-200 hover:bg-slate-50"
+                      isCorrect ? "border-emerald-300 bg-emerald-50" : isWrong ? "border-red-300 bg-red-50" : chosen ? "border-brand-300 bg-brand-50/50" : "border-line hover:bg-surface-2"
                     }`}>
                       <input type="radio" name={k} className="mt-0.5" checked={chosen} disabled={!!results} onChange={() => setAnswers((a) => ({ ...a, [k]: oi }))} />
                       <span>{opt}</span>
@@ -62,8 +62,8 @@ export function RecallQuiz({ items }: { items: RecallItem[] }) {
               {r && (
                 <div className="mt-3 text-sm">
                   <p className={r.correct ? "font-medium text-emerald-700" : "font-medium text-red-700"}>{r.correct ? "✓ Correct" : "✗ Incorrect"}</p>
-                  <p className="mt-1 text-slate-600">{r.explanation}</p>
-                  <blockquote className="mt-2 border-l-2 border-slate-300 pl-3 text-xs text-slate-500 italic">“{r.sourceQuote}”</blockquote>
+                  <p className="mt-1 text-muted">{r.explanation}</p>
+                  <blockquote className="mt-2 border-l-2 border-line-strong pl-3 text-xs text-muted italic">“{r.sourceQuote}”</blockquote>
                 </div>
               )}
             </li>
@@ -76,7 +76,7 @@ export function RecallQuiz({ items }: { items: RecallItem[] }) {
           {pending ? "Checking…" : allAnswered ? "Check answers" : "Answer every question to check"}
         </button>
       )}
-      <p className="mt-4 text-xs text-slate-400">Educational practice only — not financial advice.</p>
+      <p className="mt-4 text-xs text-faint">Educational practice only — not financial advice.</p>
     </div>
   );
 }

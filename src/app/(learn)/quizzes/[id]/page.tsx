@@ -23,18 +23,18 @@ export default async function QuizPage({ params }: { params: Promise<{ id: strin
 
   return (
     <div className="mx-auto max-w-3xl px-5 py-8 md:px-10 md:py-10">
-      <Link href="/quizzes" className="text-sm text-slate-500 hover:text-slate-800">← My quizzes</Link>
+      <Link href="/quizzes" className="text-sm text-muted hover:text-ink">← My quizzes</Link>
       <div className="mt-1 mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{a.exam.title}</h1>
-          {a.exam.description && <p className="mt-1 text-sm text-slate-500">{a.exam.description}</p>}
+          <h1 className="heading-accent text-2xl font-bold tracking-tight">{a.exam.title}</h1>
+          {a.exam.description && <p className="mt-1 text-sm text-muted">{a.exam.description}</p>}
         </div>
         <span className={`badge ${EXAM_STATUS_STYLE[a.status]}`}>{a.status === "ASSIGNED" ? "To do" : EXAM_STATUS_LABEL[a.status]}</span>
       </div>
 
       {a.status === "ASSIGNED" ? (
         <>
-          <p className="mb-4 text-sm text-slate-600">
+          <p className="mb-4 text-sm text-muted">
             {a.exam.questions.length} questions · choose one answer for each. Your answers save automatically, so you can come back later.
             {a.dueDate && <> <strong>{dueLabel(a.dueDate, startOfToday())}.</strong></>}
           </p>
@@ -47,14 +47,14 @@ export default async function QuizPage({ params }: { params: Promise<{ id: strin
           {reviewed ? (
             <>
               <p className={`text-xl font-semibold ${a.status === "PASSED" ? "text-emerald-700" : "text-red-700"}`}>{a.status === "PASSED" ? "🎉 You passed" : "Not passed this time"}</p>
-              {a.score !== null && a.total && <p className="mt-1 text-sm text-slate-600">Score: {a.score} / {a.total} ({Math.round((a.score / a.total) * 100)}%)</p>}
-              {a.reviewNote && <blockquote className="mt-4 border-l-2 border-slate-300 pl-3 text-sm whitespace-pre-wrap text-slate-700">{a.reviewNote}</blockquote>}
-              {a.reviewedAt && <p className="mt-4 text-xs text-slate-400">Reviewed {formatDateTime(a.reviewedAt)}</p>}
+              {a.score !== null && a.total && <p className="mt-1 text-sm text-muted">Score: {a.score} / {a.total} ({Math.round((a.score / a.total) * 100)}%)</p>}
+              {a.reviewNote && <blockquote className="mt-4 border-l-2 border-line-strong pl-3 text-sm whitespace-pre-wrap text-ink-2">{a.reviewNote}</blockquote>}
+              {a.reviewedAt && <p className="mt-4 text-xs text-faint">Reviewed {formatDateTime(a.reviewedAt)}</p>}
             </>
           ) : (
             <>
-              <p className="text-lg font-semibold text-slate-900">Submitted — awaiting review</p>
-              <p className="mt-1 text-sm text-slate-600">You submitted this quiz{a.submittedAt && ` on ${formatDateTime(a.submittedAt)}`}. Your instructor will review your answers and mark it pass or fail.</p>
+              <p className="text-lg font-semibold text-ink">Submitted — awaiting review</p>
+              <p className="mt-1 text-sm text-muted">You submitted this quiz{a.submittedAt && ` on ${formatDateTime(a.submittedAt)}`}. Your instructor will review your answers and mark it pass or fail.</p>
             </>
           )}
         </div>

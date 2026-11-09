@@ -36,11 +36,11 @@ export function QuestionForm({ examId, question, onDone }: {
         <textarea id={`${prefix}-text`} name="text" required maxLength={1000} className="input min-h-16 resize-y" defaultValue={question?.text} />
       </div>
       <fieldset className="space-y-2">
-        <legend className="label">Options <span className="font-normal text-slate-400">— select the correct one</span></legend>
+        <legend className="label">Options <span className="font-normal text-faint">— select the correct one</span></legend>
         {LETTERS.map((l, i) => (
           <div key={l} className="flex items-center gap-2">
             <input type="radio" name="correct" value={l} required defaultChecked={question?.correctIndex === i} aria-label={`Option ${l} is correct`} />
-            <span className="w-4 text-sm font-medium text-slate-500">{l}</span>
+            <span className="w-4 text-sm font-medium text-muted">{l}</span>
             <input name={`option${l}`} required maxLength={300} className="input" defaultValue={question?.options[i]} aria-label={`Option ${l}`} />
           </div>
         ))}
@@ -62,9 +62,9 @@ export function QuestionRow({ examId, index, question, locked, deleteSlot }: {
     return <div className="rounded-lg border border-brand-200 bg-brand-50/30 p-4"><QuestionForm examId={examId} question={question} onDone={() => setEditing(false)} /></div>;
   }
   return (
-    <div className="rounded-lg border border-slate-200 p-4">
+    <div className="rounded-lg border border-line p-4">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm font-medium whitespace-pre-wrap text-slate-900">{index + 1}. {question.text}</p>
+        <p className="text-sm font-medium whitespace-pre-wrap text-ink">{index + 1}. {question.text}</p>
         {!locked && (
           <div className="flex shrink-0 gap-1">
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(true)}>Edit</button>
@@ -74,7 +74,7 @@ export function QuestionRow({ examId, index, question, locked, deleteSlot }: {
       </div>
       <ul className="mt-2 grid gap-1 text-sm sm:grid-cols-2">
         {question.options.map((o, i) => (
-          <li key={i} className={i === question.correctIndex ? "font-medium text-emerald-700" : "text-slate-600"}>
+          <li key={i} className={i === question.correctIndex ? "font-medium text-emerald-700" : "text-muted"}>
             {LETTERS[i]}) {o} {i === question.correctIndex && "✓"}
           </li>
         ))}
@@ -104,7 +104,7 @@ export function ImportForm({ examId }: { examId: string }) {
       <input type="hidden" name="examId" value={examId} />
       <Message state={state} />
       <textarea name="text" className="input min-h-56 font-mono text-[13px]" placeholder={SAMPLE} required />
-      <p className="text-xs text-slate-500">One question per block, separated by a blank line: the question, four lines starting A) B) C) D), then <code>Answer: A</code>. If any block has a problem, nothing is imported.</p>
+      <p className="text-xs text-muted">One question per block, separated by a blank line: the question, four lines starting A) B) C) D), then <code>Answer: A</code>. If any block has a problem, nothing is imported.</p>
       <SubmitButton className="btn btn-primary btn-sm" pendingText="Importing…">Import questions</SubmitButton>
     </form>
   );
@@ -132,7 +132,7 @@ export function AssignForm({ examId, students, canAssign }: { examId: string; st
     });
   }
 
-  if (students.length === 0) return <p className="text-sm text-slate-500">Every approved student already has this quiz.</p>;
+  if (students.length === 0) return <p className="text-sm text-muted">Every approved student already has this quiz.</p>;
 
   return (
     <form action={async (form) => { await action(form); setSelected(new Set()); }} className="space-y-3">
@@ -145,26 +145,26 @@ export function AssignForm({ examId, students, canAssign }: { examId: string; st
           {Object.entries(LEVEL_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </select>
       </div>
-      <div className="max-h-72 overflow-y-auto rounded-lg border border-slate-200">
-        <label className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700">
+      <div className="max-h-72 overflow-y-auto rounded-lg border border-line">
+        <label className="flex items-center gap-2 border-b border-line/70 bg-surface-2 px-3 py-2 text-sm font-medium text-ink-2">
           <input type="checkbox" checked={allShownSelected} onChange={toggleAll} /> Select all shown ({shown.length})
         </label>
         {shown.map((s) => (
-          <label key={s.id} className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-slate-50">
+          <label key={s.id} className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-surface-2">
             <input type="checkbox" name="userIds" value={s.id} checked={selected.has(s.id)}
               onChange={(e) => setSelected((prev) => { const n = new Set(prev); if (e.target.checked) n.add(s.id); else n.delete(s.id); return n; })} />
-            <span className="text-slate-900">{s.name}</span>
-            <span className="truncate text-xs text-slate-500">{s.email}</span>
-            {s.level && <span className="ml-auto shrink-0 text-xs text-slate-400">{LEVEL_LABEL[s.level] ?? s.level}</span>}
+            <span className="text-ink">{s.name}</span>
+            <span className="truncate text-xs text-muted">{s.email}</span>
+            {s.level && <span className="ml-auto shrink-0 text-xs text-faint">{LEVEL_LABEL[s.level] ?? s.level}</span>}
           </label>
         ))}
-        {shown.length === 0 && <p className="px-3 py-3 text-sm text-slate-500">No students match.</p>}
+        {shown.length === 0 && <p className="px-3 py-3 text-sm text-muted">No students match.</p>}
       </div>
       {/* Selected students hidden by the current filter are still submitted. */}
       {[...selected].filter((id) => !shown.some((s) => s.id === id)).map((id) => <input key={id} type="hidden" name="userIds" value={id} />)}
       <div className="flex flex-wrap items-end gap-3">
         <div>
-          <label className="label" htmlFor="assign-due">Due date <span className="font-normal text-slate-400">(optional)</span></label>
+          <label className="label" htmlFor="assign-due">Due date <span className="font-normal text-faint">(optional)</span></label>
           <input id="assign-due" type="date" name="dueDate" className="input w-auto" />
         </div>
         <SubmitButton className="btn btn-primary" pendingText="Assigning…" disabled={!canAssign || selected.size === 0}>

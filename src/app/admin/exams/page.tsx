@@ -29,11 +29,11 @@ export default async function ExamsPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <h2 className="font-semibold group-hover:text-brand-700">{e.title}</h2>
-                    <p className="mt-1 line-clamp-2 text-sm text-slate-500">{e.description || "No description"}</p>
+                    <p className="mt-1 line-clamp-2 text-sm text-muted">{e.description || "No description"}</p>
                   </div>
                   {awaiting > 0 && <span className="badge shrink-0 bg-amber-50 text-amber-800 ring-1 ring-amber-200">{awaiting} to review</span>}
                 </div>
-                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500">
+                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted">
                   <span className={ready ? "" : "font-medium text-amber-700"}>{q} question{q === 1 ? "" : "s"}{ready ? "" : ` (needs ${EXAM_MIN_QUESTIONS}+)`}</span>
                   <span>{e._count.assignments} assigned</span>
                   <span>{count(e.id, "PASSED")} passed · {count(e.id, "FAILED")} failed</span>
@@ -50,13 +50,13 @@ export default async function ExamsPage() {
             <input className="input" id="title" name="title" required />
           </div>
           <div>
-            <label className="label" htmlFor="description">Description <span className="font-normal text-slate-400">(optional)</span></label>
+            <label className="label" htmlFor="description">Description <span className="font-normal text-faint">(optional)</span></label>
             <textarea className="input min-h-20" id="description" name="description" />
           </div>
           <div>
             <label className="label" htmlFor="passMark">Pass mark (%)</label>
             <input className="input w-28" id="passMark" name="passMark" type="number" min={0} max={100} defaultValue={60} />
-            <p className="mt-1 text-xs text-slate-500">Used to suggest pass/fail. You make the final decision.</p>
+            <p className="mt-1 text-xs text-muted">Used to suggest pass/fail. You make the final decision.</p>
           </div>
           <SubmitButton className="btn btn-primary w-full" pendingText="Creating…">Create quiz</SubmitButton>
         </form>

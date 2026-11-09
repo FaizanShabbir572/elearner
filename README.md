@@ -1,4 +1,4 @@
-# LearnHub — e-learning platform
+# Trade With Ray (TWR) — e-learning platform
 
 Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · Prisma 6 (SQLite)
 

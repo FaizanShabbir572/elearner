@@ -24,7 +24,7 @@ export async function KeepItFresh({ user, variant }: { user: CurrentUser; varian
 
       {/* Unfinished actions */}
       {reminder.open > 0 && (
-        <div className={`flex flex-wrap items-center justify-between gap-3 rounded-lg px-4 py-3 text-sm ${reminder.overdue ? "bg-red-50 text-red-800" : "bg-slate-50 text-slate-700"} ${variant === "page" ? "card" : "mb-4"}`}>
+        <div className={`flex flex-wrap items-center justify-between gap-3 rounded-lg px-4 py-3 text-sm ${reminder.overdue ? "bg-red-50 text-red-800" : "bg-surface-2 text-ink-2"} ${variant === "page" ? "card" : "mb-4"}`}>
           <span>
             You have <strong>{reminder.open}</strong> open action{reminder.open === 1 ? "" : "s"}
             {reminder.overdue > 0 && <>, <strong>{reminder.overdue} overdue</strong></>}.
@@ -36,16 +36,16 @@ export async function KeepItFresh({ user, variant }: { user: CurrentUser; varian
       {/* Suggested revision */}
       {(variant === "page" || suggestions.length > 0) && (
         <div className={variant === "page" ? "card p-5" : "mb-4"}>
-          <h3 className="mb-1 text-sm font-semibold text-slate-800">Suggested revision</h3>
+          <h3 className="mb-1 text-sm font-semibold text-ink">Suggested revision</h3>
           {suggestions.length === 0 ? (
-            <p className="text-sm text-slate-500">Nothing to revise yet. Completed lessons you haven&apos;t revisited for a week will show up here.</p>
+            <p className="text-sm text-muted">Nothing to revise yet. Completed lessons you haven&apos;t revisited for a week will show up here.</p>
           ) : (
-            <ul className="mt-2 divide-y divide-slate-100">
+            <ul className="mt-2 divide-y divide-line/70">
               {suggestions.map((s) => (
                 <li key={s.lessonId} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-slate-900">{s.title}</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="truncate text-sm font-medium text-ink">{s.title}</p>
+                    <p className="text-xs text-muted">
                       {s.courseTitle} · last studied {formatDate(s.lastActivity)}{s.bestQuiz !== null && ` · best quiz ${s.bestQuiz}%`}
                     </p>
                   </div>
@@ -63,19 +63,19 @@ export async function KeepItFresh({ user, variant }: { user: CurrentUser; varian
       {/* Quick recall */}
       {variant === "page" ? (
         <div className="card p-5">
-          <h3 className="mb-1 text-sm font-semibold text-slate-800">Quick recall</h3>
+          <h3 className="mb-1 text-sm font-semibold text-ink">Quick recall</h3>
           {recall.length === 0 ? (
-            <p className="text-sm text-slate-500">No recall questions right now. Finish lessons and take their quizzes — questions come back here to keep them fresh.</p>
+            <p className="text-sm text-muted">No recall questions right now. Finish lessons and take their quizzes — questions come back here to keep them fresh.</p>
           ) : (
             <>
-              <p className="mb-4 text-sm text-slate-500">A few questions from lessons you&apos;ve completed, starting with ones you found tricky.</p>
+              <p className="mb-4 text-sm text-muted">A few questions from lessons you&apos;ve completed, starting with ones you found tricky.</p>
               <RecallQuiz items={recall} />
             </>
           )}
         </div>
       ) : (
         recall.length > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-brand-50/60 px-4 py-3 text-sm text-slate-700">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-brand-50/60 px-4 py-3 text-sm text-ink-2">
             <span><strong>{recall.length}</strong> quick-recall question{recall.length === 1 ? "" : "s"} ready.</span>
             <Link href="/revision" className="btn btn-primary btn-sm">Start quick recall</Link>
           </div>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser, homeFor } from "@/lib/auth";
 import { Logo, LogoBadge } from "@/components/ui";
-import { Backdrop } from "@/components/art";
+import { Backdrop, CornerBeam } from "@/components/art";
 
 export default async function Home() {
   const user = await getCurrentUser();
@@ -10,7 +10,8 @@ export default async function Home() {
 
   return (
     <div className="relative isolate flex min-h-screen flex-col overflow-hidden">
-      <Backdrop className="h-[80vh]" />
+      <Backdrop />
+      <CornerBeam />
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-5 py-5 sm:px-6">
         <Logo className="h-10 w-auto sm:h-12" priority />
         <div className="flex gap-2">

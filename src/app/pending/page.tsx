@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { requireUser, homeFor } from "@/lib/auth";
 import { logout } from "@/app/actions/auth";
 import { LogoBadge } from "@/components/ui";
-import { Backdrop } from "@/components/art";
+import { Backdrop, CornerBeam } from "@/components/art";
 
 export const metadata = { title: "Awaiting approval" };
 export const dynamic = "force-dynamic";
@@ -14,7 +14,8 @@ export default async function PendingPage() {
 
   return (
     <div className="relative isolate flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-12">
-      <Backdrop className="h-[70vh]" />
+      <Backdrop />
+      <CornerBeam />
       <div className="mb-6"><LogoBadge className="h-28 w-28" priority /></div>
       <div className="card card-glow w-full max-w-md p-8 text-center">
         <div className={`mx-auto mb-5 grid h-14 w-14 place-items-center rounded-full ${rejected ? "bg-red-50 text-red-600" : "bg-amber-50 text-amber-600"}`}>

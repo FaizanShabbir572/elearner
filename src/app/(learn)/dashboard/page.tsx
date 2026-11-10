@@ -50,7 +50,7 @@ export default async function DashboardPage() {
   const inProgress = cards.filter((c) => c.completed > 0 && c.percent < 100).length;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 md:px-10 md:py-10">
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 md:px-9 md:py-7">
       <PageHeader
         title={isAdmin ? "Student View" : `Welcome back, ${user.name.split(" ")[0]}`}
         subtitle={isAdmin
@@ -58,13 +58,13 @@ export default async function DashboardPage() {
           : <>Your learning track: <strong className="text-ink-2">{LEVEL_LABEL[user.proficiencyLevel ?? ""] ?? "Unassigned"}</strong></>}
       />
 
-      <div className="mb-8 grid gap-3 sm:grid-cols-3 sm:gap-4 lg:gap-6">
+      <div className="mb-6 grid gap-3 sm:grid-cols-3 sm:gap-4 lg:gap-5">
         <StatCard icon="cap" value={cards.length} label="Available courses" />
         <StatCard icon="pulse" value={inProgress} label="In progress" />
         <StatCard icon="award" value={certs.length} label="Certificates earned" />
       </div>
 
-      <section className="mb-8" aria-labelledby="progress-heading">
+      <section className="mb-6" aria-labelledby="progress-heading">
         <SectionTitle><span id="progress-heading">Your progress</span></SectionTitle>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {statCards(stats).map(([label, value]) => (
@@ -75,13 +75,13 @@ export default async function DashboardPage() {
 
       <KeepItFresh user={user} variant="dashboard" />
 
-      <section className="card card-glow mb-8 p-4 sm:p-5" aria-labelledby="actions-heading">
+      <section className="card card-glow mb-6 px-4 py-3.5 sm:px-5" aria-labelledby="actions-heading">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-4">
             <IconTile name="clipboard" />
             <div className="min-w-0">
               <h2 id="actions-heading" className="font-semibold">Your open actions</h2>
-              <p className="text-sm text-muted">
+              <p className="text-[13px] text-ink-2">
                 {openActionCount === 0 ? "No open actions. Turn what you learn into practice tasks." : `${openActionCount} open action${openActionCount === 1 ? "" : "s"}`}
               </p>
             </div>
@@ -114,7 +114,7 @@ export default async function DashboardPage() {
             const cert = certByCourse.get(c.id);
             const cs = stats.perCourse.get(c.id);
             return (
-              <article key={c.id} className="card card-glow card-hover relative flex flex-col overflow-hidden p-5">
+              <article key={c.id} className="card card-glow card-hover flex flex-col overflow-hidden p-4 sm:p-[18px]">
                 <CourseArt id={c.id} title={c.title} />
                 <div className="relative flex flex-1 flex-col">
                   <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -122,8 +122,8 @@ export default async function DashboardPage() {
                     {isAdmin && !c.published && <DraftBadge />}
                     {cert && <span className="badge-pill border-emerald-300 bg-emerald-50 text-emerald-700">Completed</span>}
                   </div>
-                  <h2 className="pr-10 text-lg leading-snug font-bold">{c.title}</h2>
-                  <p className="mt-1 line-clamp-3 flex-1 text-sm text-muted">{c.description}</p>
+                  <h2 className="pr-12 text-[17px] leading-snug font-bold">{c.title}</h2>
+                  <p className="mt-1 line-clamp-3 flex-1 pr-6 text-sm text-ink-2">{c.description}</p>
                   <div className="mt-5">
                     <div className="mb-2 flex justify-between text-sm text-ink-2">
                       <span>{c.completed} of {c.total} lesson{c.total === 1 ? "" : "s"}</span>
@@ -131,7 +131,7 @@ export default async function DashboardPage() {
                     </div>
                     <ProgressBar percent={c.percent} />
                     {cs && (cs.videosTotal > 0 || cs.avgQuiz !== null) && (
-                      <p className="mt-2 text-xs text-muted">
+                      <p className="mt-2 text-xs text-ink-2">
                         {cs.videosTotal > 0 && <>{cs.videosWatched}/{cs.videosTotal} videos watched</>}
                         {cs.videosTotal > 0 && cs.avgQuiz !== null && " · "}
                         {cs.avgQuiz !== null && <>Quiz avg {cs.avgQuiz}%</>}

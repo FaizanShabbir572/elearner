@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { LogoBadge } from "@/components/ui";
-import { Backdrop } from "@/components/art";
+import { Backdrop, CornerBeam } from "@/components/art";
 export default function NotFound() {
   return (
     <div className="relative isolate flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 text-center">
-      <Backdrop className="h-[70vh]" />
+      <Backdrop />
+      <CornerBeam />
       <LogoBadge className="mb-6 h-24 w-24" />
       <p className="text-sm font-semibold text-brand-600">404</p>
       <h1 className="mt-2 text-2xl font-semibold">Page not found</h1>

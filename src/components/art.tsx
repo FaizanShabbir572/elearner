@@ -1,27 +1,38 @@
 /**
- * Decorative TWR artwork: mountain silhouettes and abstract market charts.
- * Pure SVG (no network requests), aria-hidden, low contrast, and never intercepts pointer input.
+ * Decorative TWR artwork: mountain imagery (from the TWR design, in /public/brand) and abstract market charts.
+ * Everything is aria-hidden and never intercepts pointer input.
  */
 
-/** Layered mountain ridges with a faint blue rim light. Fills its positioned parent. */
-export function Mountains({ className = "" }: { className?: string }) {
+/* eslint-disable @next/next/no-img-element -- small decorative images; plain <img> avoids layout wrappers. */
+
+const FADE_LEFT_BOTTOM = "[mask-image:linear-gradient(to_right,transparent,black_42%),linear-gradient(to_bottom,black_70%,transparent)] [mask-composite:intersect]";
+
+/** Page backdrop: the TWR mountain range with light beams across the top-right, plus a soft blue glow. */
+export function Backdrop({ className = "h-[150px] sm:h-[132px]" }: { className?: string }) {
   return (
-    <svg className={`twr-art ${className}`} viewBox="0 0 1200 320" preserveAspectRatio="xMidYMax slice" aria-hidden>
-      <defs>
-        <linearGradient id="twr-m-far" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#123b63" stopOpacity="0.55" />
-          <stop offset="1" stopColor="#061526" stopOpacity="0" />
-        </linearGradient>
-        <linearGradient id="twr-m-near" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#0b2a49" stopOpacity="0.9" />
-          <stop offset="1" stopColor="#020813" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d="M0 230 L90 170 L160 200 L260 110 L330 160 L420 80 L520 170 L600 120 L690 190 L780 95 L860 150 L950 70 L1040 160 L1120 120 L1200 160 V320 H0Z" fill="url(#twr-m-far)" />
-      <path d="M0 230 L90 170 L160 200 L260 110 L330 160 L420 80 L520 170 L600 120 L690 190 L780 95 L860 150 L950 70 L1040 160 L1120 120 L1200 160" fill="none" stroke="#2f8fff" strokeOpacity="0.28" strokeWidth="1.2" />
-      <path d="M0 280 L120 220 L210 250 L330 180 L430 240 L540 200 L640 260 L760 190 L880 250 L990 200 L1100 240 L1200 210 V320 H0Z" fill="url(#twr-m-near)" />
-      <path d="M0 280 L120 220 L210 250 L330 180 L430 240 L540 200 L640 260 L760 190 L880 250 L990 200 L1100 240 L1200 210" fill="none" stroke="#00cfff" strokeOpacity="0.18" strokeWidth="1" />
-    </svg>
+    <div className="twr-art absolute inset-x-0 top-0 -z-10 h-80 overflow-hidden" aria-hidden>
+      <div className="absolute inset-x-0 top-0 h-80 bg-[radial-gradient(ellipse_60%_80%_at_80%_-10%,rgb(0_110_255/0.14),transparent_70%)]" />
+      <img src="/brand/art-header.webp" alt="" width={1396} height={158} decoding="async"
+        className={`absolute top-0 right-0 w-auto max-w-none object-cover object-right max-sm:opacity-50 ${FADE_LEFT_BOTTOM} ${className}`} />
+    </div>
+  );
+}
+
+/** The lit mountain peak at the foot of the sidebar. */
+export function SidebarPeak({ className = "" }: { className?: string }) {
+  return (
+    <img src="/brand/art-sidebar.webp" alt="" width={384} height={410} decoding="async" aria-hidden
+      className={`twr-art w-full [mask-image:linear-gradient(to_bottom,transparent,black_30%,black_85%,transparent)] ${className}`} />
+  );
+}
+
+/** Diagonal light beam in the bottom-right corner of the viewport. */
+export function CornerBeam() {
+  return (
+    <div className="twr-art fixed right-0 bottom-0 -z-10 h-72 w-72 overflow-hidden max-md:hidden" aria-hidden>
+      <div className="absolute right-[-30%] bottom-[18%] h-[3px] w-[150%] -rotate-45 bg-linear-to-r from-transparent via-[#1e8fff] to-[#7cc8ff] shadow-[0_0_18px_4px_rgb(0_130_255/0.6)]" />
+      <div className="absolute right-[-30%] bottom-[26%] h-10 w-[150%] -rotate-45 bg-linear-to-r from-transparent via-[#0a5cd6]/30 to-[#1e8fff]/40 blur-xl" />
+    </div>
   );
 }
 
@@ -41,98 +52,96 @@ function rng(seed: number) {
   };
 }
 
+/** A rising run of candlesticks climbing out of the top-right corner. */
 function Candles({ seed }: { seed: number }) {
   const r = rng(seed);
-  let price = 70;
-  const candles = Array.from({ length: 14 }, (_, i) => {
+  const n = 16;
+  let price = 92;
+  const candles = Array.from({ length: n }, (_, i) => {
     const open = price;
-    price = Math.max(12, Math.min(88, price - 1.5 - r() * 6 + r() * 3.2));
+    const drift = 5.5 + r() * 2;
+    price = Math.max(4, price - drift + (r() < 0.3 ? drift * 1.4 : 0) * r());
     const close = price;
-    const hi = Math.min(open, close) - r() * 6;
-    const lo = Math.max(open, close) + r() * 6;
-    return { x: 8 + i * 13, open, close, hi, lo, up: close < open };
+    const hi = Math.min(open, close) - 2 - r() * 5;
+    const lo = Math.max(open, close) + 2 + r() * 5;
+    return { x: 6 + i * 11.5, open, close, hi, lo, up: close < open };
   });
   return (
-    <svg viewBox="0 0 190 100" className="h-full w-full" preserveAspectRatio="xMaxYMin meet">
-      {candles.map((c) => (
-        <g key={c.x} stroke={c.up ? "#00cfff" : "#2f6fb0"} fill={c.up ? "#00cfff" : "#2f6fb0"}>
-          <line x1={c.x} x2={c.x} y1={c.hi} y2={c.lo} strokeWidth="1" />
-          <rect x={c.x - 3.5} y={Math.min(c.open, c.close)} width="7" height={Math.max(2, Math.abs(c.open - c.close))} rx="1" />
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-function VolumeProfile({ seed }: { seed: number }) {
-  const r = rng(seed);
-  const rows = 18;
-  const poc = 6 + Math.floor(r() * 6);
-  return (
-    <svg viewBox="0 0 120 108" className="h-full w-full" preserveAspectRatio="xMaxYMid meet">
-      {Array.from({ length: rows }, (_, i) => {
-        const w = Math.max(10, 110 * Math.exp(-((i - poc) ** 2) / 22) * (0.75 + r() * 0.35));
-        return <rect key={i} x={120 - w} y={i * 6} width={w} height="4.2" rx="1" fill={i === poc ? "#00cfff" : "#1a7fe0"} opacity={i === poc ? 0.95 : 0.65} />;
+    <svg viewBox="0 0 190 100" className="h-full w-full drop-shadow-[0_0_5px_rgb(0_150_255/0.8)]" preserveAspectRatio="xMaxYMin meet">
+      {candles.map((c, i) => {
+        const fade = 0.45 + (0.55 * i) / n;
+        const color = c.up ? "#4fb6ff" : "#1a74e8";
+        return (
+          <g key={c.x} stroke={color} fill={color} opacity={fade}>
+            <line x1={c.x} x2={c.x} y1={c.hi} y2={c.lo} strokeWidth="1.1" />
+            <rect x={c.x - 3} y={Math.min(c.open, c.close)} width="6" height={Math.max(2.5, Math.abs(c.open - c.close))} rx="0.8" />
+          </g>
+        );
       })}
     </svg>
   );
 }
 
-function MarketStructure({ seed }: { seed: number }) {
+/** Horizontal volume-at-price bars hanging off the right edge of the card. */
+function VolumeProfile({ seed }: { seed: number }) {
   const r = rng(seed);
-  const pts = [[6, 82], [30, 58], [46, 70], [74, 40], [92, 54], [124, 22], [140, 34], [178, 8]].map(([x, y]) => [x, y + (r() - 0.5) * 8]);
-  const d = pts.map(([x, y], i) => `${i ? "L" : "M"}${x} ${y}`).join(" ");
+  const rows = 22;
+  const poc = 5 + Math.floor(r() * 4);
   return (
-    <svg viewBox="0 0 190 100" className="h-full w-full" preserveAspectRatio="xMaxYMin meet">
-      {[20, 45, 70].map((y) => <line key={y} x1="0" x2="190" y1={y} y2={y} stroke="#183b59" strokeDasharray="3 4" />)}
-      <path d={`${d} L178 100 L6 100Z`} fill="#008cff" opacity="0.12" />
-      <path d={d} fill="none" stroke="#00cfff" strokeWidth="1.8" strokeLinejoin="round" />
-      {pts.map(([x, y], i) => <circle key={i} cx={x} cy={y} r="2.4" fill={i % 2 ? "#00cfff" : "#008cff"} />)}
+    <svg viewBox="0 0 120 132" className="h-full w-full drop-shadow-[0_0_6px_rgb(0_150_255/0.7)]" preserveAspectRatio="xMaxYMin meet">
+      <defs>
+        <linearGradient id={`vp-${seed}`} x1="0" x2="1">
+          <stop offset="0" stopColor="#0a5cd6" stopOpacity="0.1" />
+          <stop offset="1" stopColor="#3aa8ff" stopOpacity="1" />
+        </linearGradient>
+      </defs>
+      {Array.from({ length: rows }, (_, i) => {
+        const w = Math.max(8, 112 * Math.exp(-((i - poc) ** 2) / 26) * (0.7 + r() * 0.4));
+        return <rect key={i} x={120 - w} y={2 + i * 6} width={w} height="4.4" fill={i === poc ? "#8fd3ff" : `url(#vp-${seed})`} opacity={i === poc ? 1 : 0.9} />;
+      })}
     </svg>
   );
 }
 
-function Peaks() {
+/** A glowing code tile, for web and programming courses. */
+function CodeTile() {
   return (
-    <svg viewBox="0 0 190 100" className="h-full w-full" preserveAspectRatio="xMaxYMin meet">
-      <path d="M0 100 L40 60 L62 74 L104 22 L132 52 L150 40 L190 72 V100Z" fill="#0f3e6e" opacity="0.8" />
-      <path d="M0 100 L40 60 L62 74 L104 22 L132 52 L150 40 L190 72" fill="none" stroke="#00cfff" strokeOpacity="0.55" strokeWidth="1.2" />
-      <path d="M60 100 L104 60 L128 78 L160 56 L190 84 V100Z" fill="#082642" />
-    </svg>
-  );
-}
-
-const VARIANTS = ["candles", "structure", "volume", "peaks"] as const;
-
-/**
- * Low-opacity chart art for the top-right corner of a course card. The variant follows the course
- * title where it is obviously about one topic (e.g. volume profiles), otherwise the course id.
- */
-export function CourseArt({ id, title }: { id: string; title: string }) {
-  const seed = hash(id);
-  const t = title.toLowerCase();
-  const variant = /volume|profile|auction/.test(t) ? "volume"
-    : /structure|trend|swing/.test(t) ? "structure"
-    : /candle|price action|chart/.test(t) ? "candles"
-    : VARIANTS[seed % VARIANTS.length];
-  return (
-    <div className="twr-art absolute top-0 right-0 h-24 w-44 opacity-55 [mask-image:linear-gradient(to_left,black_35%,transparent),linear-gradient(to_bottom,black_55%,transparent)] [mask-composite:intersect] sm:w-48" aria-hidden>
-      {variant === "candles" && <Candles seed={seed} />}
-      {variant === "volume" && <VolumeProfile seed={seed} />}
-      {variant === "structure" && <MarketStructure seed={seed} />}
-      {variant === "peaks" && <Peaks />}
+    <div className="absolute top-3 right-4 grid h-14 w-[4.5rem] place-items-center rounded-lg border border-[#2f86ea]/80 bg-linear-to-b from-[#0d2a52]/80 to-[#071a36]/80 shadow-[0_0_18px_-2px_rgb(0_130_255/0.65),inset_0_0_14px_rgb(0_120_255/0.25)]">
+      <svg viewBox="0 0 24 24" className="h-8 w-8 text-[#3aa2ff] drop-shadow-[0_0_6px_rgb(0_150_255/0.9)]" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" />
+      </svg>
     </div>
   );
 }
 
-/** Page backdrop: soft blue glow, a faint light streak and low-contrast mountains behind the page header. */
-export function Backdrop({ className = "h-80" }: { className?: string }) {
+const VARIANTS = ["candles", "peak", "candles", "volume"] as const;
+type Variant = (typeof VARIANTS)[number] | "code";
+
+function variantFor(id: string, title: string): Variant {
+  const t = title.toLowerCase();
+  if (/volume|profile|auction/.test(t)) return "volume";
+  if (/\bweb\b|html|css|javascript|coding|programming|develop/.test(t)) return "code";
+  if (/candle|price action|chart|trend|pattern/.test(t)) return "candles";
+  return VARIANTS[hash(id) % VARIANTS.length];
+}
+
+/**
+ * Artwork for the top-right corner of a course card. The variant follows the course title where it is
+ * obviously about one topic (volume profiles, web/code), otherwise a stable pick from the course id.
+ */
+export function CourseArt({ id, title }: { id: string; title: string }) {
+  const seed = hash(id);
+  const variant = variantFor(id, title);
+  if (variant === "code") return <div className="twr-art" aria-hidden><CodeTile /></div>;
+  if (variant === "peak") {
+    return (
+      <img src="/brand/art-peak.webp" alt="" width={284} height={132} decoding="async" aria-hidden
+        className="twr-art absolute top-0 right-0 h-[5.5rem] w-auto [mask-image:linear-gradient(to_right,transparent,black_35%),linear-gradient(to_bottom,black_60%,transparent)] [mask-composite:intersect]" />
+    );
+  }
   return (
-    <div className={`twr-art absolute inset-x-0 top-0 -z-10 overflow-hidden ${className}`} aria-hidden>
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_90%_at_85%_-10%,rgb(0_140_255/0.16),transparent_70%)]" />
-      <div className="absolute -top-10 right-[8%] h-[140%] w-px rotate-[35deg] bg-linear-to-b from-transparent via-cyan/40 to-transparent shadow-[0_0_12px_rgb(0_207_255/0.6)] max-sm:hidden" />
-      <Mountains className="absolute inset-0 h-full w-full opacity-60" />
-      <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-b from-transparent to-canvas" />
+    <div className={`twr-art absolute top-0 right-0 ${variant === "volume" ? "h-32 w-36" : "h-28 w-52"} [mask-image:linear-gradient(to_left,black_40%,transparent),linear-gradient(to_bottom,black_65%,transparent)] [mask-composite:intersect]`} aria-hidden>
+      {variant === "candles" ? <Candles seed={seed} /> : <VolumeProfile seed={seed} />}
     </div>
   );
 }

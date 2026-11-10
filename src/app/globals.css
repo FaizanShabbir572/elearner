@@ -95,18 +95,42 @@
 
 @layer components {
   /* Surfaces */
+  /*
+   * Glass panel: navy glass, thin blue edge, and a lit line along the bottom edge (the TWR card signature).
+   * .card-glow brightens the edge and the bottom light for stat tiles and course cards.
+   */
   .card {
-    @apply rounded-2xl border border-line;
-    background: linear-gradient(180deg, rgb(10 32 54 / 0.55), rgb(6 21 38 / 0.92));
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03), 0 8px 24px -16px rgb(0 0 0 / 0.8);
+    @apply relative rounded-[14px] border;
+    border-color: rgb(52 130 220 / 0.32);
+    background:
+      radial-gradient(120% 80% at 0% 0%, rgb(30 90 160 / 0.14), transparent 60%),
+      linear-gradient(180deg, rgb(9 26 46 / 0.88), rgb(4 14 28 / 0.94));
+    box-shadow: inset 0 1px 0 rgb(140 200 255 / 0.07), inset 0 0 24px rgb(0 100 220 / 0.06), 0 10px 30px -18px rgb(0 0 0 / 0.9);
   }
-  /* Highlighted card: cyan edge + restrained blue glow (stat tiles, course cards). */
+  .card::after {
+    content: "";
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    bottom: -1px;
+    height: 1px;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, transparent, rgb(40 150 255 / 0.55), transparent);
+    pointer-events: none;
+  }
   .card-glow {
-    border-color: rgb(0 207 255 / 0.28);
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05), var(--shadow-glow);
+    border-color: rgb(60 150 245 / 0.5);
+    box-shadow: inset 0 1px 0 rgb(160 210 255 / 0.1), inset 0 0 28px rgb(0 110 240 / 0.1), 0 0 0 1px rgb(0 120 255 / 0.06), 0 12px 32px -14px rgb(0 110 255 / 0.55);
   }
-  .card-hover { @apply transition-[box-shadow,border-color,transform] duration-200; }
-  .card-hover:hover { border-color: rgb(0 207 255 / 0.5); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), var(--shadow-glow-strong); }
+  .card-glow::after {
+    left: 6%;
+    right: 6%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgb(30 150 255 / 0.9) 30%, rgb(120 210 255) 50%, rgb(30 150 255 / 0.9) 70%, transparent);
+    box-shadow: 0 0 12px 1px rgb(0 140 255 / 0.75), 0 0 28px 4px rgb(0 120 255 / 0.35);
+  }
+  .card-hover { @apply transition-[box-shadow,border-color] duration-200; }
+  .card-hover:hover { border-color: rgb(90 175 255 / 0.75); box-shadow: inset 0 1px 0 rgb(160 210 255 / 0.12), inset 0 0 32px rgb(0 120 255 / 0.14), 0 0 0 1px rgb(0 140 255 / 0.12), 0 14px 40px -12px rgb(0 130 255 / 0.75); }
 
   /* Forms */
   .input {
@@ -125,12 +149,13 @@
   }
   .btn-primary {
     @apply font-semibold text-white;
-    background: linear-gradient(90deg, var(--color-cyan) -20%, var(--color-accent-deep) 100%);
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25), 0 6px 18px -8px rgb(0 140 255 / 0.8);
+    background: linear-gradient(180deg, #2f97ff 0%, #1479ff 45%, #0a62ee 100%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), inset 0 -1px 0 rgb(0 40 120 / 0.4), 0 6px 20px -8px rgb(0 120 255 / 0.85);
   }
-  .btn-primary:hover:not(:disabled) { filter: brightness(1.12); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), 0 8px 26px -6px rgb(0 160 255 / 0.95); }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.1); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35), 0 0 0 1px rgb(90 175 255 / 0.5), 0 8px 26px -6px rgb(0 140 255 / 0.95); }
   .btn-secondary {
-    @apply border border-accent/60 bg-accent/5 text-ink hover:border-cyan hover:bg-accent/15;
+    @apply border border-[#3a95ff]/80 bg-[#071a33]/80 font-semibold text-ink hover:border-[#6cb8ff] hover:bg-accent/15;
+    box-shadow: inset 0 0 12px rgb(0 120 255 / 0.12), 0 0 14px -6px rgb(0 140 255 / 0.7);
   }
   .btn-secondary:hover:not(:disabled) { box-shadow: 0 0 18px -6px rgb(0 160 255 / 0.85); }
   .btn-danger { @apply border border-red-300 bg-red-50 text-red-700 hover:bg-red-100; }
@@ -138,13 +163,28 @@
   .btn-ghost { @apply text-muted hover:bg-surface-3 hover:text-ink; }
   .btn-sm { @apply px-2.5 py-1.5 text-xs; }
   /* Selected segment in a filter/tab group. */
-  .btn-active { @apply bg-accent text-white shadow-[0_0_16px_-6px_rgb(0_140_255/0.9)]; }
+  .btn-active {
+    @apply border border-[#3a9bff] text-white;
+    background: linear-gradient(180deg, #1670e6, #0b4fb8);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), 0 0 16px -4px rgb(0 140 255 / 0.85);
+  }
+
+  /* Plain glowing icon on a soft halo (stat cards, panels). */
+  .icon-glow { @apply text-[#1e95ff]; filter: drop-shadow(0 0 6px rgb(0 140 255 / 0.75)); }
+  .icon-halo { @apply grid shrink-0 place-items-center rounded-full; background: radial-gradient(circle, rgb(20 90 180 / 0.35), rgb(10 40 80 / 0.15) 55%, transparent 72%); }
 
   /* Badges */
   .badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
   .badge-pill {
-    @apply inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold;
+    @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold;
   }
+  /* Blue level pill and grey draft pill from the TWR course cards. */
+  .pill-blue {
+    @apply border-[#3a8eff]/70 text-white;
+    background: linear-gradient(180deg, #1466d6, #0a449c);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 0 10px -3px rgb(0 130 255 / 0.8);
+  }
+  .pill-grey { @apply border-[#3a4656] bg-[#1c2532] text-[#d3dbe5]; }
 
   /* Tables (use on <table>) */
   .table { @apply w-full text-left text-sm; }

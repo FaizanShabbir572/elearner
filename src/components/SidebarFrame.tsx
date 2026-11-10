@@ -37,7 +37,7 @@ export function SidebarFrame({ brand, children }: { brand: React.ReactNode; chil
       {open && <div className="fixed inset-0 z-40 bg-black/65 backdrop-blur-[2px] md:hidden" onClick={() => setOpen(false)} aria-hidden />}
 
       <aside id="app-sidebar"
-        className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] transition-[transform,visibility] duration-200 md:sticky md:top-0 md:z-20 md:h-screen md:w-64 md:max-w-none md:shrink-0 md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] transition-[transform,visibility] duration-200 md:sticky md:top-0 md:z-20 md:h-screen md:w-60 md:max-w-none md:shrink-0 md:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full max-md:invisible"
         }`}>
         <button type="button" onClick={() => setOpen(false)} className="btn btn-ghost absolute top-3 right-3 z-10 px-2 md:hidden" aria-label="Close menu">
